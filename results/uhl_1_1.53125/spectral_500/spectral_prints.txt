@@ -1,0 +1,193 @@
+getting P,S took: 0.0
+making spectral with P,S sizes: 500 500
+made the main hankel, that took: 237
+made hankel for: 0 ( 1 of 3 ), that took: 232
+made hankel for: 1 ( 2 of 3 ), that took: 232
+made hankel for: 2 ( 3 of 3 ), that took: 234
+making hankels took: 947.28125
+running svd took: 0.125
+
+
+ 1 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 1, 'extraction time': 947.40625}
+
+
+ 2 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 2, 'extraction time': 947.40625}
+
+
+ 3 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 3, 'extraction time': 947.46875}
+
+
+ 4 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 4, 'extraction time': 947.40625}
+
+
+ 5 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 5, 'extraction time': 947.40625}
+
+
+ 6 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 6, 'extraction time': 947.40625}
+
+
+ 7 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 7, 'extraction time': 947.40625}
+
+
+ 8 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 8, 'extraction time': 947.40625}
+
+
+ 9 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 9, 'extraction time': 947.40625}
+
+
+ 10 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 10, 'extraction time': 947.40625}
+
+
+ 11 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 11, 'extraction time': 947.40625}
+
+
+ 12 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 12, 'extraction time': 947.40625}
+
+
+ 13 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 13, 'extraction time': 947.40625}
+
+
+ 14 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 14, 'extraction time': 947.46875}
+
+
+ 15 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 15, 'extraction time': 947.40625}
+
+
+ 16 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 16, 'extraction time': 947.40625}
+
+
+ 17 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 17, 'extraction time': 947.40625}
+
+
+ 18 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 18, 'extraction time': 947.40625}
+
+
+ 19 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 19, 'extraction time': 947.40625}
+
+
+ 20 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 20, 'extraction time': 947.40625}
+
+
+ 21 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 21, 'extraction time': 947.40625}
+
+
+ 22 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 22, 'extraction time': 947.46875}
+
+
+ 23 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 23, 'extraction time': 947.40625}
+
+
+ 24 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 24, 'extraction time': 947.40625}
+
+
+ 25 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 25, 'extraction time': 947.40625}
+
+
+ 26 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 26, 'extraction time': 947.40625}
+
+
+ 27 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 27, 'extraction time': 947.40625}
+
+
+ 28 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 28, 'extraction time': 947.46875}
+
+
+ 29 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 29, 'extraction time': 947.40625}
+
+
+ 30 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 30, 'extraction time': 947.40625}
+
+
+ 40 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 40, 'extraction time': 947.40625}
+
+
+ 50 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 50, 'extraction time': 947.453125}
+
+
+ 60 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 60, 'extraction time': 947.40625}
+
+
+ 70 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 70, 'extraction time': 947.46875}
+
+
+ 80 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 80, 'extraction time': 947.421875}
+
+
+ 90 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 90, 'extraction time': 947.46875}
+
+
+ 100 
+
+ {'|P|': 500, '|S|': 500, 'rnn name': '1584481755.0297325', 'hankel time': 947.28125, 'svd time': 0.125, 'k': 100, 'extraction time': 947.46875}

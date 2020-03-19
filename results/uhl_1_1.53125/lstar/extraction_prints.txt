@@ -1,0 +1,644 @@
+~~~~~~~~~~ starting expansion ~~~~~~~~~~~~~~
+beginning expansion: |P|: 1 |S|: 4
+finished expanding, |P|: 2 |S|: 4
+expanding observation table from size P=1 took: 0.078125 seconds
+got table with |P|: 2 , |S|: 4
+table has P (printing only 'edge' prefs):
+0
+
+
+and S (printing only 'edge' suffs):
+0 §§ 1 §§ 2 §§ <EOS>
+
+
+now minimising
+making minimiser class for table (prepping relations for clustering) took: 0.0 seconds
+cluster initialisation (dbscan) took: 0.0 seconds
+dbscan made this many clusters               : 2 ,from 2 prefixes
+first refine to simulation took: 0.0 seconds
+refining to a simulation grew that to        : 2 clusters
+refining to cliques took: 0.0 seconds
+refining to cliques made no more clusters
+clustering the prefixes to clique+simulation requirements took: 0.0 seconds
+total time spent on non-p transitions: 0.0 (non-p transitions: 5 , out of 6 overall transitions)
+total time spent on forcing transitions: 0 (forced 0 transitions out of 6 )
+total time spent on completely bad transitions: 0 (completely randomly forced 0 transitions out of 6 )
+making pdfa from the clusters, ie mapping transitions etc took: 0.0 seconds
+making pdfa from table (after already prepping relations) took: 0.0 seconds
+
+
+got hypothesis # 1 , size: 2
+sample number: 0 of 500
+found disagreeing pref: (0, 1, 1)
+hypothesis distribution after pref: [0.775, 0.139, 0.0, 0.086]
+target distribution after pref    : [0.162, 0.741, 0.0, 0.097]
+found cex on attempt 0 of 500
+found by sampling: target
+searching for counterexample took: 0.015625 seconds
+~~~~~~~~~~ starting expansion ~~~~~~~~~~~~~~
+beginning expansion: |P|: 4 |S|: 4
+added separating suffix: (0, 0)
+time since last suffix add: 0.171875
+overall ignored 0 suffixes so far in this expand
+beginning expansion: |P|: 4 |S|: 5
+finished expanding, |P|: 4 |S|: 5
+expanding observation table from size P=4 took: 0.203125 seconds
+got table with |P|: 4 , |S|: 5
+table has P (printing only 'edge' prefs):
+011
+
+
+and S (printing only 'edge' suffs):
+1 §§ 2 §§ <EOS> §§ 00
+
+
+now minimising
+making minimiser class for table (prepping relations for clustering) took: 0.0 seconds
+cluster initialisation (dbscan) took: 0.0 seconds
+dbscan made this many clusters               : 3 ,from 4 prefixes
+first refine to simulation took: 0.0 seconds
+refining to a simulation grew that to        : 3 clusters
+refining to cliques took: 0.0 seconds
+refining to cliques made no more clusters
+clustering the prefixes to clique+simulation requirements took: 0.0 seconds
+total time spent on non-p transitions: 0.0 (non-p transitions: 6 , out of 9 overall transitions)
+total time spent on forcing transitions: 0 (forced 0 transitions out of 9 )
+total time spent on completely bad transitions: 0 (completely randomly forced 0 transitions out of 9 )
+making pdfa from the clusters, ie mapping transitions etc took: 0.0 seconds
+making pdfa from table (after already prepping relations) took: 0.0 seconds
+
+
+got hypothesis # 2 , size: 3
+sample number: 0 of 500
+found disagreeing pref: (0, 1, 0, 0, 1, 1, 0)
+hypothesis distribution after pref: [0.748, 0.146, 0.0, 0.106]
+target distribution after pref    : [0.162, 0.741, 0.0, 0.097]
+found cex on attempt 0 of 500
+found by sampling: target
+searching for counterexample took: 0.015625 seconds
+~~~~~~~~~~ starting expansion ~~~~~~~~~~~~~~
+beginning expansion: |P|: 9 |S|: 5
+added separating suffix: (0, 0, 0)
+time since last suffix add: 0.40625
+overall ignored 0 suffixes so far in this expand
+beginning expansion: |P|: 9 |S|: 6
+added separating suffix: (0, 0, 0, 0)
+time since last suffix add: 0.296875
+overall ignored 0 suffixes so far in this expand
+beginning expansion: |P|: 9 |S|: 7
+added separating suffix: (0, 0, 0, 0, 0)
+time since last suffix add: 0.09375
+overall ignored 0 suffixes so far in this expand
+beginning expansion: |P|: 9 |S|: 8
+finished expanding, |P|: 10 |S|: 8
+expanding observation table from size P=9 took: 1.09375 seconds
+got table with |P|: 10 , |S|: 8
+table has P (printing only 'edge' prefs):
+011
+*****
+01001100
+
+
+and S (printing only 'edge' suffs):
+1 §§ 2 §§ <EOS> §§ 00000
+
+
+now minimising
+making minimiser class for table (prepping relations for clustering) took: 0.0 seconds
+cluster initialisation (dbscan) took: 0.0 seconds
+dbscan made this many clusters               : 9 ,from 10 prefixes
+first refine to simulation took: 0.0 seconds
+refining to a simulation grew that to        : 9 clusters
+refining to cliques took: 0.0 seconds
+refining to cliques made no more clusters
+clustering the prefixes to clique+simulation requirements took: 0.0 seconds
+total time spent on non-p transitions: 0.0625 (non-p transitions: 18 , out of 27 overall transitions)
+total time spent on forcing transitions: 0 (forced 0 transitions out of 27 )
+total time spent on completely bad transitions: 0 (completely randomly forced 0 transitions out of 27 )
+making pdfa from the clusters, ie mapping transitions etc took: 0.0625 seconds
+making pdfa from table (after already prepping relations) took: 0.0625 seconds
+
+
+got hypothesis # 3 , size: 9
+sample number: 0 of 500
+sample number: 1 of 500
+sample number: 2 of 500
+sample number: 3 of 500
+sample number: 4 of 500
+sample number: 5 of 500
+sample number: 6 of 500
+sample number: 7 of 500
+sample number: 8 of 500
+sample number: 9 of 500
+sample number: 10 of 500
+sample number: 11 of 500
+sample number: 12 of 500
+sample number: 13 of 500
+sample number: 14 of 500
+sample number: 15 of 500
+sample number: 16 of 500
+sample number: 17 of 500
+sample number: 18 of 500
+sample number: 19 of 500
+sample number: 20 of 500
+sample number: 21 of 500
+sample number: 22 of 500
+sample number: 23 of 500
+sample number: 24 of 500
+sample number: 25 of 500
+sample number: 26 of 500
+sample number: 27 of 500
+sample number: 28 of 500
+sample number: 29 of 500
+sample number: 30 of 500
+sample number: 31 of 500
+sample number: 32 of 500
+sample number: 33 of 500
+sample number: 34 of 500
+sample number: 35 of 500
+sample number: 36 of 500
+sample number: 37 of 500
+sample number: 38 of 500
+sample number: 39 of 500
+sample number: 40 of 500
+sample number: 41 of 500
+sample number: 42 of 500
+sample number: 43 of 500
+sample number: 44 of 500
+sample number: 45 of 500
+sample number: 46 of 500
+sample number: 47 of 500
+sample number: 48 of 500
+sample number: 49 of 500
+sample number: 50 of 500
+sample number: 51 of 500
+sample number: 52 of 500
+sample number: 53 of 500
+sample number: 54 of 500
+sample number: 55 of 500
+sample number: 56 of 500
+sample number: 57 of 500
+sample number: 58 of 500
+sample number: 59 of 500
+sample number: 60 of 500
+sample number: 61 of 500
+sample number: 62 of 500
+sample number: 63 of 500
+sample number: 64 of 500
+sample number: 65 of 500
+sample number: 66 of 500
+sample number: 67 of 500
+sample number: 68 of 500
+sample number: 69 of 500
+sample number: 70 of 500
+sample number: 71 of 500
+sample number: 72 of 500
+sample number: 73 of 500
+sample number: 74 of 500
+sample number: 75 of 500
+sample number: 76 of 500
+sample number: 77 of 500
+sample number: 78 of 500
+sample number: 79 of 500
+sample number: 80 of 500
+sample number: 81 of 500
+sample number: 82 of 500
+sample number: 83 of 500
+sample number: 84 of 500
+sample number: 85 of 500
+sample number: 86 of 500
+sample number: 87 of 500
+sample number: 88 of 500
+sample number: 89 of 500
+sample number: 90 of 500
+sample number: 91 of 500
+sample number: 92 of 500
+sample number: 93 of 500
+sample number: 94 of 500
+sample number: 95 of 500
+sample number: 96 of 500
+sample number: 97 of 500
+sample number: 98 of 500
+sample number: 99 of 500
+sample number: 100 of 500
+sample number: 101 of 500
+sample number: 102 of 500
+sample number: 103 of 500
+sample number: 104 of 500
+sample number: 105 of 500
+sample number: 106 of 500
+sample number: 107 of 500
+sample number: 108 of 500
+sample number: 109 of 500
+sample number: 110 of 500
+sample number: 111 of 500
+sample number: 112 of 500
+sample number: 113 of 500
+sample number: 114 of 500
+sample number: 115 of 500
+sample number: 116 of 500
+sample number: 117 of 500
+sample number: 118 of 500
+sample number: 119 of 500
+sample number: 120 of 500
+sample number: 121 of 500
+sample number: 122 of 500
+sample number: 123 of 500
+sample number: 124 of 500
+sample number: 125 of 500
+sample number: 126 of 500
+sample number: 127 of 500
+sample number: 128 of 500
+sample number: 129 of 500
+sample number: 130 of 500
+sample number: 131 of 500
+sample number: 132 of 500
+sample number: 133 of 500
+sample number: 134 of 500
+sample number: 135 of 500
+sample number: 136 of 500
+sample number: 137 of 500
+sample number: 138 of 500
+sample number: 139 of 500
+sample number: 140 of 500
+sample number: 141 of 500
+sample number: 142 of 500
+sample number: 143 of 500
+sample number: 144 of 500
+sample number: 145 of 500
+sample number: 146 of 500
+sample number: 147 of 500
+sample number: 148 of 500
+sample number: 149 of 500
+sample number: 150 of 500
+sample number: 151 of 500
+sample number: 152 of 500
+sample number: 153 of 500
+sample number: 154 of 500
+sample number: 155 of 500
+sample number: 156 of 500
+sample number: 157 of 500
+sample number: 158 of 500
+sample number: 159 of 500
+sample number: 160 of 500
+sample number: 161 of 500
+sample number: 162 of 500
+sample number: 163 of 500
+sample number: 164 of 500
+sample number: 165 of 500
+sample number: 166 of 500
+sample number: 167 of 500
+sample number: 168 of 500
+sample number: 169 of 500
+sample number: 170 of 500
+sample number: 171 of 500
+sample number: 172 of 500
+sample number: 173 of 500
+sample number: 174 of 500
+sample number: 175 of 500
+sample number: 176 of 500
+sample number: 177 of 500
+sample number: 178 of 500
+sample number: 179 of 500
+sample number: 180 of 500
+sample number: 181 of 500
+sample number: 182 of 500
+sample number: 183 of 500
+sample number: 184 of 500
+sample number: 185 of 500
+sample number: 186 of 500
+sample number: 187 of 500
+sample number: 188 of 500
+sample number: 189 of 500
+sample number: 190 of 500
+sample number: 191 of 500
+sample number: 192 of 500
+sample number: 193 of 500
+sample number: 194 of 500
+sample number: 195 of 500
+sample number: 196 of 500
+sample number: 197 of 500
+sample number: 198 of 500
+sample number: 199 of 500
+sample number: 200 of 500
+sample number: 201 of 500
+sample number: 202 of 500
+sample number: 203 of 500
+sample number: 204 of 500
+sample number: 205 of 500
+sample number: 206 of 500
+sample number: 207 of 500
+sample number: 208 of 500
+sample number: 209 of 500
+sample number: 210 of 500
+sample number: 211 of 500
+sample number: 212 of 500
+sample number: 213 of 500
+sample number: 214 of 500
+sample number: 215 of 500
+sample number: 216 of 500
+sample number: 217 of 500
+sample number: 218 of 500
+sample number: 219 of 500
+sample number: 220 of 500
+sample number: 221 of 500
+sample number: 222 of 500
+sample number: 223 of 500
+sample number: 224 of 500
+sample number: 225 of 500
+sample number: 226 of 500
+sample number: 227 of 500
+sample number: 228 of 500
+sample number: 229 of 500
+sample number: 230 of 500
+sample number: 231 of 500
+sample number: 232 of 500
+sample number: 233 of 500
+sample number: 234 of 500
+sample number: 235 of 500
+sample number: 236 of 500
+sample number: 237 of 500
+sample number: 238 of 500
+sample number: 239 of 500
+sample number: 240 of 500
+sample number: 241 of 500
+sample number: 242 of 500
+sample number: 243 of 500
+sample number: 244 of 500
+sample number: 245 of 500
+sample number: 246 of 500
+sample number: 247 of 500
+sample number: 248 of 500
+sample number: 249 of 500
+sample number: 250 of 500
+sample number: 251 of 500
+sample number: 252 of 500
+sample number: 253 of 500
+sample number: 254 of 500
+sample number: 255 of 500
+sample number: 256 of 500
+sample number: 257 of 500
+sample number: 258 of 500
+sample number: 259 of 500
+sample number: 260 of 500
+sample number: 261 of 500
+sample number: 262 of 500
+sample number: 263 of 500
+sample number: 264 of 500
+sample number: 265 of 500
+sample number: 266 of 500
+sample number: 267 of 500
+sample number: 268 of 500
+sample number: 269 of 500
+sample number: 270 of 500
+sample number: 271 of 500
+sample number: 272 of 500
+sample number: 273 of 500
+sample number: 274 of 500
+sample number: 275 of 500
+sample number: 276 of 500
+sample number: 277 of 500
+sample number: 278 of 500
+sample number: 279 of 500
+sample number: 280 of 500
+sample number: 281 of 500
+sample number: 282 of 500
+sample number: 283 of 500
+sample number: 284 of 500
+sample number: 285 of 500
+sample number: 286 of 500
+sample number: 287 of 500
+sample number: 288 of 500
+sample number: 289 of 500
+sample number: 290 of 500
+sample number: 291 of 500
+sample number: 292 of 500
+sample number: 293 of 500
+sample number: 294 of 500
+sample number: 295 of 500
+sample number: 296 of 500
+sample number: 297 of 500
+sample number: 298 of 500
+sample number: 299 of 500
+sample number: 300 of 500
+sample number: 301 of 500
+sample number: 302 of 500
+sample number: 303 of 500
+sample number: 304 of 500
+sample number: 305 of 500
+sample number: 306 of 500
+sample number: 307 of 500
+sample number: 308 of 500
+sample number: 309 of 500
+sample number: 310 of 500
+sample number: 311 of 500
+sample number: 312 of 500
+sample number: 313 of 500
+sample number: 314 of 500
+sample number: 315 of 500
+sample number: 316 of 500
+sample number: 317 of 500
+sample number: 318 of 500
+sample number: 319 of 500
+sample number: 320 of 500
+sample number: 321 of 500
+sample number: 322 of 500
+sample number: 323 of 500
+sample number: 324 of 500
+sample number: 325 of 500
+sample number: 326 of 500
+sample number: 327 of 500
+sample number: 328 of 500
+sample number: 329 of 500
+sample number: 330 of 500
+sample number: 331 of 500
+sample number: 332 of 500
+sample number: 333 of 500
+sample number: 334 of 500
+sample number: 335 of 500
+sample number: 336 of 500
+sample number: 337 of 500
+sample number: 338 of 500
+sample number: 339 of 500
+sample number: 340 of 500
+sample number: 341 of 500
+sample number: 342 of 500
+sample number: 343 of 500
+sample number: 344 of 500
+sample number: 345 of 500
+sample number: 346 of 500
+sample number: 347 of 500
+sample number: 348 of 500
+sample number: 349 of 500
+sample number: 350 of 500
+sample number: 351 of 500
+sample number: 352 of 500
+sample number: 353 of 500
+sample number: 354 of 500
+sample number: 355 of 500
+sample number: 356 of 500
+sample number: 357 of 500
+sample number: 358 of 500
+sample number: 359 of 500
+sample number: 360 of 500
+sample number: 361 of 500
+sample number: 362 of 500
+sample number: 363 of 500
+sample number: 364 of 500
+sample number: 365 of 500
+sample number: 366 of 500
+sample number: 367 of 500
+sample number: 368 of 500
+sample number: 369 of 500
+sample number: 370 of 500
+sample number: 371 of 500
+sample number: 372 of 500
+sample number: 373 of 500
+sample number: 374 of 500
+sample number: 375 of 500
+sample number: 376 of 500
+sample number: 377 of 500
+sample number: 378 of 500
+sample number: 379 of 500
+sample number: 380 of 500
+sample number: 381 of 500
+sample number: 382 of 500
+sample number: 383 of 500
+sample number: 384 of 500
+sample number: 385 of 500
+sample number: 386 of 500
+sample number: 387 of 500
+sample number: 388 of 500
+sample number: 389 of 500
+sample number: 390 of 500
+sample number: 391 of 500
+sample number: 392 of 500
+sample number: 393 of 500
+sample number: 394 of 500
+sample number: 395 of 500
+sample number: 396 of 500
+sample number: 397 of 500
+sample number: 398 of 500
+sample number: 399 of 500
+sample number: 400 of 500
+sample number: 401 of 500
+sample number: 402 of 500
+sample number: 403 of 500
+sample number: 404 of 500
+sample number: 405 of 500
+sample number: 406 of 500
+sample number: 407 of 500
+sample number: 408 of 500
+sample number: 409 of 500
+sample number: 410 of 500
+sample number: 411 of 500
+sample number: 412 of 500
+sample number: 413 of 500
+sample number: 414 of 500
+sample number: 415 of 500
+sample number: 416 of 500
+sample number: 417 of 500
+sample number: 418 of 500
+sample number: 419 of 500
+sample number: 420 of 500
+sample number: 421 of 500
+sample number: 422 of 500
+sample number: 423 of 500
+sample number: 424 of 500
+sample number: 425 of 500
+sample number: 426 of 500
+sample number: 427 of 500
+sample number: 428 of 500
+sample number: 429 of 500
+sample number: 430 of 500
+sample number: 431 of 500
+sample number: 432 of 500
+sample number: 433 of 500
+sample number: 434 of 500
+sample number: 435 of 500
+sample number: 436 of 500
+sample number: 437 of 500
+sample number: 438 of 500
+sample number: 439 of 500
+sample number: 440 of 500
+sample number: 441 of 500
+sample number: 442 of 500
+sample number: 443 of 500
+sample number: 444 of 500
+sample number: 445 of 500
+sample number: 446 of 500
+sample number: 447 of 500
+sample number: 448 of 500
+sample number: 449 of 500
+sample number: 450 of 500
+sample number: 451 of 500
+sample number: 452 of 500
+sample number: 453 of 500
+sample number: 454 of 500
+sample number: 455 of 500
+sample number: 456 of 500
+sample number: 457 of 500
+sample number: 458 of 500
+sample number: 459 of 500
+sample number: 460 of 500
+sample number: 461 of 500
+sample number: 462 of 500
+sample number: 463 of 500
+sample number: 464 of 500
+sample number: 465 of 500
+sample number: 466 of 500
+sample number: 467 of 500
+sample number: 468 of 500
+sample number: 469 of 500
+sample number: 470 of 500
+sample number: 471 of 500
+sample number: 472 of 500
+sample number: 473 of 500
+sample number: 474 of 500
+sample number: 475 of 500
+sample number: 476 of 500
+sample number: 477 of 500
+sample number: 478 of 500
+sample number: 479 of 500
+sample number: 480 of 500
+sample number: 481 of 500
+sample number: 482 of 500
+sample number: 483 of 500
+sample number: 484 of 500
+sample number: 485 of 500
+sample number: 486 of 500
+sample number: 487 of 500
+sample number: 488 of 500
+sample number: 489 of 500
+sample number: 490 of 500
+sample number: 491 of 500
+sample number: 492 of 500
+sample number: 493 of 500
+sample number: 494 of 500
+sample number: 495 of 500
+sample number: 496 of 500
+sample number: 497 of 500
+sample number: 498 of 500
+sample number: 499 of 500
+no counterexamples found
+searching for counterexample took: 16.1875 seconds
+
+
+creation stats:
+ atol:0.1
+interval width:0.2
+counterexamples:[(0, 1, 1), (0, 1, 0, 0, 1, 1, 0)]
+extracted sizes:[2, 3, 9]
+final |S|:8
+final |P|:10
+max |S|:50
+max |P|:1000
+max states:inf
+n_cex_attempts:500
+max_counterexample_length:50
+extraction time:17.65625
+separating suffix threshold:-1
+interesting p transition threshold:-1
+number of ignored separating suffixes in last expand:0
+expansion time limit:inf
+num skipped prefixes:0

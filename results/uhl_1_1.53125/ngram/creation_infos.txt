@@ -1,0 +1,25 @@
+ngrams made from 443878 samples, of total length 5000027 (including EOSs)
+=== 1 ===
+ {'extraction time': 2124.46875, 'size': 1, 'n': 1, 'total samples len (including EOS)': 5000027, 'num samples': 443878, 'samples cutoff len': 1000} 
+
+
+=== 2 ===
+ {'extraction time': 2124.875, 'size': 4, 'n': 2, 'total samples len (including EOS)': 5000027, 'num samples': 443878, 'samples cutoff len': 1000} 
+
+
+=== 3 ===
+ {'extraction time': 2124.890625, 'size': 13, 'n': 3, 'total samples len (including EOS)': 5000027, 'num samples': 443878, 'samples cutoff len': 1000} 
+
+
+=== 4 ===
+ {'extraction time': 2125.0, 'size': 34, 'n': 4, 'total samples len (including EOS)': 5000027, 'num samples': 443878, 'samples cutoff len': 1000} 
+
+
+=== 5 ===
+ {'extraction time': 2124.984375, 'size': 82, 'n': 5, 'total samples len (including EOS)': 5000027, 'num samples': 443878, 'samples cutoff len': 1000} 
+
+
+=== 6 ===
+ {'extraction time': 2125.046875, 'size': 184, 'n': 6, 'total samples len (including EOS)': 5000027, 'num samples': 443878, 'samples cutoff len': 1000} 
+
+
