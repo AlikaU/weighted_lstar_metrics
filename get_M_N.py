@@ -4,7 +4,7 @@ from our_grammars import uhl1, uhl2, uhl3
 from Helper_Functions import prepare_directory, overwrite_file, clean_val
 from LanguageModel import LanguageModel
 from time import process_time
-from RNNTokenPredictor import RNNTokenPredictor, train_rnn
+from RNNTokenPredictor import RNNTokenPredictor, train_rnn, load_rnn
 
 
 def make_spice_style_train(lm,n_samples,max_len,filename):
@@ -65,70 +65,7 @@ def do_lstar(rnn, rnn_folder, args):
 	print("finished lstar extraction, that took:",clock_str(lstar_start))
 	return lstar_pdfa
 
-def get_M_N():
-    parser = argparse.ArgumentParser()
-    # language (either spice or uhl, it wont do both)
-    parser.add_argument('--spice-example',action='store_true')
-    parser.add_argument('--uhl-num',type=int,default=-1)
-
-    # train params
-    parser.add_argument('--RNNClass',type=str,default="LSTM",choices=["LSTM","GRU"])
-    parser.add_argument('--hidden-dim',type=int,default=50)
-    parser.add_argument('--input-dim',type=int,default=10)
-    parser.add_argument('--num-layers', type=int,default=2)
-    parser.add_argument('--dropout',type=float,default=0.5)
-    parser.add_argument('--learning-rates',type=ast.literal_eval,default=[0.01, 0.008, 0.006, 0.004, 0.002, 0.001, 0.0005, 0.0001, 5e-05])
-    parser.add_argument('--iterations-per-learning-rate',type=int,default=10)
-    parser.add_argument('--batch-size',type=int,default=100)
-    parser.add_argument('--total-generated-train-samples',type=int,default=5000,help="only relevant when its going to make samples for you, ie when using a uhl") 
-    parser.add_argument('--max-generated-train-sample-len',type=int,default=200,help="only relevant when its going to make samples for you, ie when using a uhl") 
-
-    # # lstar extraction params
-    parser.add_argument('--t-tol',type=float,default=0.1) # referred to as atol elsewhere
-    parser.add_argument('--interval_width',type=float,default=0.2) # generally keep it about 2*t-tol, but pointless if that ends up being close to 1
-    parser.add_argument('--dump-every',type=int,default=None)
-    parser.add_argument('--num-cex-attempts',type=int,default=500)
-    parser.add_argument('--max-counterexample-length',type=int,default=50)
-    parser.add_argument('--max-P',type=int,default=1000)
-    parser.add_argument('--max-states',type=int,default=math.inf) # effectively matching max-P by default
-    parser.add_argument('--max-S',type=int,default=50)
-    parser.add_argument('--lstar-time-limit',type=int,default=math.inf)
-    parser.add_argument('--progress-P-print-rate',type=int,default=math.inf)
-    parser.add_argument('--lstar-p-threshold',type=float,default=-1)
-    parser.add_argument('--lstar-s-threshold',type=float,default=-1)
-
-
-    parser.add_argument('--code-test',action='store_true')
-
-    args = parser.parse_args()
-
-    if not args.spice_example and None is args.uhl_num:
-        print("pick a spice or uhl")
-        exit()
-
-
-    if args.code_test:
-        args.hidden_dim = 10
-        args.input_dim = 5
-        args.num_layers = 2
-        args.learning_rates = [0.01]
-        args.iterations_per_learning_rate = 1
-        args.total_generated_train_samples = 500
-        args.nPS = 20
-        args.spectral_max_sample_attempts = 100
-        args.num_cex_attempts = 20
-        args.max_P = 50
-        args.max_S = 20
-        args.lstar_time_limit = 20
-        args.ngram_total_sample_length = 1e3
-        args.ndcg_num_samples = 100
-        args.wer_num_samples = 100
-        args.wer_max_len = 10
-
-    args.k_list = []
-    for t in args.k_ranges:
-        args.k_list += list(range(*t))
-
+def get_rnn(args):
     uhl = {1:uhl1(),2:uhl2(),3:uhl3()}
     folder = "results"
     prepare_directory(folder)
@@ -151,12 +88,7 @@ def get_M_N():
         print("done")
         target.draw_nicely(keep=True,filename=rnn_folder+"/target_pdfa")
 
-
     all_samples, alphabet = read_spice_style_train_data(train_filename)
-
-    if len(alphabet) < args.ndcg_k:
-        print("warning - using ndcg-k",args.ndcg_k,"with |alphabet|=",len(alphabet),
-            "nothing technically wrong, just probably not very interesting results (all probably very high ndcg)")
 
     train_frac = 0.9
     val_frac = 0.05
@@ -202,8 +134,73 @@ def get_M_N():
         print("test loss:         ",rnn_final_losses["test"],file=f,flush=True)
 
     print("done getting losses, that took:",clock_str(loss_start),flush=True)
+    return rnn, rnn_folder
 
-    print("beginning extractions! all will be saved and printed in subdirectories in",rnn_folder)
 
-    lstar_pdfa = do_lstar(rnn, rnn_folder, args)
-    return lstar_pdfa, rnn
+def parse_args():
+    parser = argparse.ArgumentParser()
+    # language (either spice or uhl, it wont do both)
+    parser.add_argument('--spice-example',action='store_true')
+    parser.add_argument('--uhl-num',type=int,default=-1)
+
+    # train params
+    parser.add_argument('--RNNClass',type=str,default="LSTM",choices=["LSTM","GRU"])
+    parser.add_argument('--hidden-dim',type=int,default=50)
+    parser.add_argument('--input-dim',type=int,default=10)
+    parser.add_argument('--num-layers', type=int,default=2)
+    parser.add_argument('--dropout',type=float,default=0.5)
+    parser.add_argument('--learning-rates',type=ast.literal_eval,default=[0.01, 0.008, 0.006, 0.004, 0.002, 0.001, 0.0005, 0.0001, 5e-05])
+    parser.add_argument('--iterations-per-learning-rate',type=int,default=10)
+    parser.add_argument('--batch-size',type=int,default=100)
+    parser.add_argument('--total-generated-train-samples',type=int,default=5000,help="only relevant when its going to make samples for you, ie when using a uhl") 
+    parser.add_argument('--max-generated-train-sample-len',type=int,default=200,help="only relevant when its going to make samples for you, ie when using a uhl") 
+
+    # # lstar extraction params
+    parser.add_argument('--t-tol',type=float,default=0.1) # referred to as atol elsewhere
+    parser.add_argument('--interval_width',type=float,default=0.2) # generally keep it about 2*t-tol, but pointless if that ends up being close to 1
+    parser.add_argument('--dump-every',type=int,default=None)
+    parser.add_argument('--num-cex-attempts',type=int,default=500)
+    parser.add_argument('--max-counterexample-length',type=int,default=50)
+    parser.add_argument('--max-P',type=int,default=1000)
+    parser.add_argument('--max-states',type=int,default=math.inf) # effectively matching max-P by default
+    parser.add_argument('--max-S',type=int,default=50)
+    parser.add_argument('--lstar-time-limit',type=int,default=math.inf)
+    parser.add_argument('--progress-P-print-rate',type=int,default=math.inf)
+    parser.add_argument('--lstar-p-threshold',type=float,default=-1)
+    parser.add_argument('--lstar-s-threshold',type=float,default=-1)
+
+    args = parser.parse_args()
+    if not args.spice_example and None is args.uhl_num:
+        print("pick a spice or uhl")
+        exit()
+    return args
+
+def save_rnn_folder_name(rnn_folder):
+    fname='rnn_folder_name.txt' 
+    f = open(fname, 'w')
+    f.write(rnn_folder)
+    f.close()
+
+def get_rnn_folder_name():
+    fname='rnn_folder_name.txt' 
+    f = open(fname, 'r')
+    rnn_folder = f.read()
+    f.close()
+    return rnn_folder
+
+def get_M_N(train_new_rnn = True):
+    args = parse_args()
+    if (train_new_rnn):
+        N, rnn_folder = get_rnn(args)
+        save_rnn_folder_name(rnn_folder)
+    else:
+        rnn_folder = get_rnn_folder_name()
+        N = load_rnn(rnn_folder)
+
+    print("beginning lstar extraction! all will be saved and printed in subdirectories in",rnn_folder)
+    M = do_lstar(N, rnn_folder, args)
+    return M, N
+
+    
+
+  

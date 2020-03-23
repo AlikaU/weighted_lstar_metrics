@@ -1,0 +1,4 @@
+results/
+results_old/
+rnn_folder_name.txt
+__pycache__/
