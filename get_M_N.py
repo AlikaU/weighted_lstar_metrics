@@ -170,9 +170,9 @@ def parse_args():
     parser.add_argument('--lstar-s-threshold',type=float,default=-1)
 
     args = parser.parse_args()
-    if not args.spice_example and None is args.uhl_num:
-        print("pick a spice or uhl")
-        exit()
+    # if not args.spice_example and None is args.uhl_num:
+    #     print("pick a spice or uhl")
+    #     exit()
     return args
 
 def save_rnn_folder_name(rnn_folder):
@@ -187,6 +187,14 @@ def get_rnn_folder_name():
     rnn_folder = f.read()
     f.close()
     return rnn_folder
+
+def get_M_N_hack(rnn_folder, train_new_rnn = True):
+    args = parse_args()
+    N = load_rnn(rnn_folder)
+
+    print("beginning lstar extraction! all will be saved and printed in subdirectories in",rnn_folder)
+    M = do_lstar(N, rnn_folder, args)
+    return M, N
 
 def get_M_N(train_new_rnn = True):
     args = parse_args()

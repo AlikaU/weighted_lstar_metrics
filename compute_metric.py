@@ -1,14 +1,20 @@
-from get_M_N import get_M_N
+from get_M_N import get_M_N, get_M_N_hack
 from time import time
 import argparse, ast, math
 
 UNMARKED = '_'
 UNUSED = '*'
 
+uhl_1 = 'results/uhl_1_1.59375'
+uhl_2 = 'results/uhl_2_1.546875'
+uhl_3 = 'results/uhl_3_1.578125'
+
 
 def main():
     start_time = time()
-    M, N = get_M_N(False)
+    M, N = get_M_N_hack(uhl_1, False)
+    n = 11
+    get_vasilevskii_test_set(M, n)
     
     elapsed_time = time() - start_time
     print(f'\ntime elapsed: {elapsed_time}')
@@ -25,10 +31,10 @@ def get_vasilevskii_test_set(M, n, criterion='alphabetical'):
         n = k
         print(f"Increased n to {n}")
 
-    # characterizing_set = construct_characterizing_set(M)
-    # print(f'characterizing_set: {characterizing_set}')
-    spanning_tree_words = construct_spanning_tree_words(M)
-    print(f'spanning_tree_words: {spanning_tree_words}')
+    characterizing_set = construct_characterizing_set(M)
+    print(f'characterizing_set: {characterizing_set}')
+    # spanning_tree_words = construct_spanning_tree_words(M)
+    # print(f'spanning_tree_words: {spanning_tree_words}')
 
     # for i in range(n - k + 1):
     #     all_words_of_len = get_all_words_of_len(i + 1, alphabet)
@@ -42,12 +48,13 @@ def construct_spanning_tree_words(pdfa):
 
     while len(queue) > 0:
         (q, word) = queue.pop()
-        for s in pdfa.alphabet:
-            newstate = pdfa.delta[q][s]
+        for s in pdfa.input_alphabet:
+            newstate = pdfa.transitions[q][pdfa.char2int[s]]
             if not newstate in visited:
-                queue.insert(0, (newstate, word + s))
+                print(f'word: {word}, s: {s}')
+                queue.insert(0, (newstate, word + str(s)))
                 visited.add(newstate)
-                result.add(word + s)
+                result.add(word + str(s))
     result = list(result)
     result.sort()
     result.sort(key=len)
@@ -55,7 +62,7 @@ def construct_spanning_tree_words(pdfa):
 
 
 def construct_characterizing_set(pdfa):
-    states = pdfa.Q
+    states = pdfa.check_reachable_states()
     marked = True
     dist_strs = [[UNMARKED] * len(states) for i in range(len(states))]
     dist_strs_set = {''}
