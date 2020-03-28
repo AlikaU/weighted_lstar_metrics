@@ -81,6 +81,12 @@ class PDFA: #deterministic probabilistic WFA that just has the states listed out
 	def next_state(self,state,char):
 		return self.transitions[state][char]
 
+	def state_after_word(self,word):
+		state = self._initial_state
+		for char in word:
+			state = self.next_state(state, char)
+		return state
+
 	def state_probs_dist(self,state):
 		return self.probabilities_list[state]
 

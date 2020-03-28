@@ -17,8 +17,16 @@ def main():
     start_time = time()
     print(f'\ncomputing distance between PDFA and RNN!')
     M, N = get_M_N_hack(uhl_1, False)
-    n = 10    
-    get_vasilevskii_test_set(M, n)
+    alpha = 0.2
+    is_upper_bound = True
+
+    m = len(list(M.check_reachable_states()))
+    for n in range(m, m + 5): 
+        test_words = get_vasilevskii_test_set(M, n)
+        d = bound_d(M, N, '', alpha, test_words, is_upper_bound)
+        print(f'd for n = {n}: {d}')
+    
+    
     
     elapsed_time = time() - start_time
     print(f'\ntime elapsed: {elapsed_time}')
@@ -30,7 +38,7 @@ def get_vasilevskii_test_set(M, n, criterion='alphabetical'):
     test_words = {}
     k = len(list(M.check_reachable_states()))
     alphabet = M.input_alphabet
-    print(f"The pdfa had k={k} states, n is {n}!")
+    #print(f"The pdfa had k={k} states, n is {n}!")
 
     if k > n:
         print(f"The pdfa had k={k} states, which is more than n={n}!")
@@ -41,7 +49,7 @@ def get_vasilevskii_test_set(M, n, criterion='alphabetical'):
     #characterizing_set = construct_characterizing_set(M) 
     #print(f'characterizing_set: {characterizing_set}')
     spanning_tree_words = construct_spanning_tree_words(M)
-    print(f'spanning_tree_words: {spanning_tree_words}')
+    #print(f'spanning_tree_words: {spanning_tree_words}')
 
     for i in range(n - k + 1):
         all_words_of_len = get_all_words_of_len(i + 1, alphabet)
@@ -51,7 +59,40 @@ def get_vasilevskii_test_set(M, n, criterion='alphabetical'):
     for words_of_len in test_words:
         test_words[words_of_len] = list(test_words[words_of_len])
         test_words[words_of_len].sort()
-    print(test_words)
+    #print(test_words)
+    return test_words
+
+
+def bound_d(M, N, w, alpha, test_words, is_upper_bound):
+
+    longest_wordlen = max(k for k in test_words.keys())
+    if len(w) >= longest_wordlen: # base case
+        x = 1 if is_upper_bound else 0
+        return alpha * rho(M, N, w) + (1 - alpha) * x
+    
+    else: # recursive case
+        a = alpha * rho(M, N, w)
+        biggest = 0
+        for next_w in test_words[len(w)+1]:
+            if not w in next_w: continue
+            b = bound_d(M, N, next_w, alpha, test_words, is_upper_bound)
+            biggest = max(biggest, b)
+        return a + (1 - alpha) * b
+
+
+def rho(M, N, w):
+    w = tuple(map(int, list(w)))
+    Mw = M.transition_weights[M.state_after_word(w)]
+    Nw = N.state_probs_dist(N.state_from_sequence(w))
+    biggest = 0
+    for a in M.input_alphabet:
+        biggest = max(biggest, abs(Mw[a] - Nw[a]))
+    M_eos = Mw['<EOS>']
+    N_eos = Nw[len(M.input_alphabet)]
+    biggest = max(biggest, abs(M_eos - N_eos))
+    return biggest
+
+
         
 
 def construct_spanning_tree_words(pdfa):
@@ -62,7 +103,7 @@ def construct_spanning_tree_words(pdfa):
     while len(queue) > 0:
         (q, word) = queue.pop()
         for s in pdfa.input_alphabet:
-            newstate = pdfa.transitions[q][pdfa.char2int[s]]
+            newstate = pdfa.next_state(q, pdfa.char2int[s])
             if not newstate in visited:
                 queue.insert(0, (newstate, word + str(s)))
                 visited.add(newstate)
@@ -145,7 +186,7 @@ def try_using_existing_dstrings(pdfa, p, q, dist_strs_set, dist_strs, states):
 
 def pdfa_transition(pdfa, state, word):
     for s in word:
-        state = pdfa.transitions[state][s]
+        state = pdfa.next_state(state, s)
     return state
 
 
