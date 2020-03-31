@@ -2,6 +2,7 @@ from get_M_N import get_M_N, get_M_N_hack
 from our_grammars import assert_and_give_pdfa
 from time import time
 import argparse, ast, math
+import matplotlib.pyplot as plt
 
 UNMARKED = '_'
 UNUSED = '*'
@@ -11,25 +12,64 @@ uhl_2 = 'results/uhl_2_1.546875'
 uhl_3 = 'results/uhl_3_1.578125'
 
 
+def plot_results(results, grammar, filename):
+    for key in results['upper']:
+        plt.plot(results['x'], results['upper'][key], '-', label=key)
+    # for key in results['lower']:
+    #     plt.plot(results['x'], results['lower'][key], '-', label=key)
+    #plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=3, fancybox=True, shadow=True)
+    plt.legend(loc='upper left')
+    plt.title(f'Results for {grammar}')
+    plt.grid(b=True, which='major', color='#666666', linestyle='-', alpha=0.4)
+    plt.minorticks_on()
+    plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
+    #plt.ylim(0, 1)
+    plt.ylabel('d')
+    plt.xlabel('n')
+    plt.savefig(filename)
+    plt.close()
 
 
 def main():
+    grammar = uhl_1
+    grammarname = 'uhl_1'
+
     start_time = time()
     print(f'\ncomputing distance between PDFA and RNN!')
-    M, N = get_M_N_hack(uhl_1, False)
-    alpha = 0.2
-    is_upper_bound = True
+    M, N = get_M_N_hack(grammar, False)
+    #alphas = [0.05, 0.1, 0.2]
+    alphas = [0.2]
+
+    results = { 'x': [], 'upper': {}, 'lower': {}}
+    nmax = 6
 
     m = len(list(M.check_reachable_states()))
-    for n in range(m, m + 5): 
+    for n in range(m, m + nmax):
+        results['x'].append(n)
         test_words = get_vasilevskii_test_set(M, n)
-        d = bound_d(M, N, '', alpha, test_words, is_upper_bound)
-        print(f'd for n = {n}: {d}')
+
+        for alpha in alphas:
+            calc_start_time = time()
+            upper = bound_d(M, N, '', alpha, test_words, True)
+            #lower = bound_d(M, N, '', alpha, test_words, False)
+            calc_elapsed_time = time() - calc_start_time
+            print(f'upper bound on d for n = {n}, alpha = {alpha}: {upper}')
+            #print(f'lower bound on d for n = {n}, alpha = {alpha}: {lower}')
+            print(f'calculating bounds for n = {n}, alpha = {alpha} took {calc_elapsed_time:.3f}s')
+
+            resultkeyupper = f'upper, alpha = {alpha}'
+            #resultkeylower = f'lower, alpha = {alpha}'
+            if resultkeyupper in results['upper']: #and resultkeylower in results['lower']:
+                results['upper'][resultkeyupper].append(upper)
+                #results['lower'][resultkeylower].append(lower)
+            else: 
+                results['upper'][resultkeyupper] = [upper]
+                #results['lower'][resultkeylower] = [lower]
     
-    
+    plot_results(results, grammarname, f'{grammar}/distance_plots.png')
     
     elapsed_time = time() - start_time
-    print(f'\ntime elapsed: {elapsed_time}')
+    print(f'\ntotal time elapsed: {elapsed_time}')
 
 # options:
 # criterion: alphabetical, greedy
