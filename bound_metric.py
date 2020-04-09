@@ -3,6 +3,7 @@ from our_grammars import assert_and_give_pdfa
 from time import time
 import argparse, ast, math
 import matplotlib.pyplot as plt
+from toy_pdfa import toy_pdfa1
 
 UNMARKED = '_'
 UNUSED = '*'
@@ -249,23 +250,6 @@ def construct_test_words(test_words, spanning_tree_words, all_words_of_length, c
                     test_words[len(new_word)].add(new_word)
                 else: 
                     test_words[len(new_word)] = {new_word}
-
-
-def toy_pdfa(): # just a small pdfa to test that the spanning tree is done correctly
-    informal_name = "toy_pdfa"
-    transitions = {}
-    transition_weights = {}
-    
-    alphabet = [0,1]
-    a, b = alphabet
-    transitions[0] = {a: 1, b: 2}
-    transitions[1] = {a: 3, b: 1}
-    transitions[2] = {a: 3, b: 4}
-    transitions[3] = {a: 2, b: 1}
-    transitions[4] = {a: 0, b: 4}
-    for i in range(5):
-        transition_weights[i]={a:0.75,b:0.15}
-    return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
 
 
 main()
