@@ -1,10 +1,22 @@
 import numpy as np
-from toy_pdfa import toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7
+from toy_pdfa import toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7, toy_pdfa8, toy_pdfa9, toy_pdfa10, toy_pdfa11, toy_pdfa12, uhl1a
+from our_grammars import uhl1, uhl2, uhl3
 resultfolder = 'results/compute_metric/'
 
 def main():
-    compute_d(toy_pdfa3(), toy_pdfa5(), 0.2, 'example1')
-    compute_d(toy_pdfa6(), toy_pdfa7(), 0.2, 'example3')
+    compute_d(toy_pdfa3(), toy_pdfa5(), 0.2, 'example1') # expected: 0.4
+    # compute_d(toy_pdfa6(), toy_pdfa7(), 0.2, 'example3') # expected: 0.4444444444444445
+    # compute_d(toy_pdfa6(), toy_pdfa8(), 0.2, 'example4') # expected: 0.5555555555555556
+    # compute_d(toy_pdfa9(), toy_pdfa10(), 0.2, 'example5') # expected: 0.4
+    # compute_d(toy_pdfa6(), toy_pdfa11(), 0.2, 'example8') # expected: 0.3555555555555556
+    # compute_d(toy_pdfa6(), toy_pdfa12(), 0.2, 'example9') # expected: 0.2622950819672131
+    # compute_d(uhl1(), toy_pdfa12(), 0.2, 'example10') # expected: ?
+    # compute_d(uhl1(), uhl3(), 0.2, 'example11') # expected: ?
+    # compute_d(toy_pdfa6(), uhl1(), 0.2, 'example12') # expected: ?
+
+    # same, but on the last state, the transition probabilities are changed by 0.01
+    compute_d(uhl1(), uhl1a(), 0.2, 'example13') # expected: something small
+
 
 # in: M, N, accuracy thershold maybe
 def compute_d(M, N, alpha, filename):
