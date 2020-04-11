@@ -42,7 +42,8 @@ def main():
     alphas = [0.2]
 
     results = { 'x': [], 'upper': {}, 'lower': {}}
-    nmax = 6
+    #nmax = 6
+    nmax = 1
 
     m = len(list(M.check_reachable_states()))
     for n in range(m, m + nmax):
@@ -252,5 +253,5 @@ def construct_test_words(test_words, spanning_tree_words, all_words_of_length, c
                     test_words[len(new_word)] = {new_word}
 
 
-main()
+#main()
     
