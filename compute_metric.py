@@ -24,8 +24,9 @@ def main():
 
 def compare_truedist_vs_bound(M, N, alpha, filename):
     dist, count = compute_d(M, N, alpha, filename)
-    n = len(N.check_reachable_states()) + 1
+    n = len(N.check_reachable_states())
     test_words = get_vasilevskii_test_set(M, n)
+    print(f'test words: {test_words}')
     upper_bound = bound_d(M, N, '', alpha, test_words, True)
 
     f = open(resultfolder+filename+'/log.txt', 'w')
@@ -49,10 +50,10 @@ def bound_d(M, N, w, alpha, test_words, is_upper_bound):
         a = alpha * rho_pdfas(M, N, qM, qN)
         biggest = 0
         for next_w in test_words[len(w)+1]:
-            if not w in next_w: continue
+            if not w == next_w[:len(w)]: continue
             b = bound_d(M, N, next_w, alpha, test_words, is_upper_bound)
             biggest = max(biggest, b)
-        return a + (1 - alpha) * b
+        return a + (1 - alpha) * biggest
 
 
 

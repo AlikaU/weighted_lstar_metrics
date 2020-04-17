@@ -116,10 +116,10 @@ def bound_d(M, N, w, alpha, test_words, is_upper_bound):
         a = alpha * rho(M, N, w)
         biggest = 0
         for next_w in test_words[len(w)+1]:
-            if not w in next_w: continue
+            if not w == next_w[:len(w)]: continue
             b = bound_d(M, N, next_w, alpha, test_words, is_upper_bound)
             biggest = max(biggest, b)
-        return a + (1 - alpha) * b
+        return a + (1 - alpha) * biggest
 
 
 def rho(M, N, w):
