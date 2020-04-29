@@ -4,7 +4,42 @@ from our_grammars import uhl1, uhl2, uhl3
 from bound_metric import get_vasilevskii_test_set
 resultfolder = 'results/compute_metric/'
 
+CHG_NSTATES = 'number of states'
+CHG_DIST_ALL = 'next state distribution of all states by 0.01'
+CHG_DIST_ONE = 'next state distribution of one state by 0.01'
+
+def d_as_difference_increases(M, changetype):
+    upper_bounds, true_dists, x = [], [], []
+    for i in range (10):
+        N = get_modified_aut(M, i, changetype)
+        upper_bound, true_dist = compare_truedist_vs_bound(M, N, 0.2, f'{M.informal_name}_{changetype}_{i}')
+        upper_bounds.append(upper_bound)
+        true_dists.append(true_dist)
+        x.append(i)
+    Logger.log(f'Results as we modify the {changetype}:\nUpper bounds: {upper_bounds} \nTrue distances: {true_dists}')
+    # TODO plot x, y and save
+
+def get_modified_aut(M, i, changetype):
+    if changetype == CHG_NSTATES: # TODO make reduced automata with i less states
+        pass
+    elif changetype == CHG_DIST_ALL: # TODO make reduced automata with all state dist changed by 0.01 * i
+        pass
+    elif changetype == CHG_DIST_ONE:  # TODO make reduced automata with furthest state from start dist changed by 0.01 * i
+        pass
+    N = 2 
+    return N
+
+
+
 def main():
+    M = 1 # TODO: 10-state automata: one like tree, one like cycles
+    d_as_difference_increases(M, CHG_NSTATES)
+    d_as_difference_increases(M, CHG_DIST_ALL)
+    d_as_difference_increases(M, CHG_DIST_ONE)
+    M = 2 # TODO
+    d_as_difference_increases(M, CHG_NSTATES)
+    d_as_difference_increases(M, CHG_DIST_ALL)
+    d_as_difference_increases(M, CHG_DIST_ONE)
     
     # compute_d(toy_pdfa6(), toy_pdfa7(), 0.2, 'example3') # expected: 0.4444444444444445
     # compute_d(toy_pdfa6(), toy_pdfa8(), 0.2, 'example4') # expected: 0.5555555555555556
@@ -16,24 +51,21 @@ def main():
     # compute_d(toy_pdfa6(), uhl1(), 0.2, 'example12') # expected: ?
 
     # same, but on the last state, the transition probabilities are changed by 0.01
-    compare_truedist_vs_bound(toy_pdfa3(), toy_pdfa5(), 0.2, 'example1') # expected: 0.4
-    compare_truedist_vs_bound(uhl1(), uhl1_first_st(), 0.2, 'uhl1_first_st') # expected: something big
-    compare_truedist_vs_bound(uhl1(), uhl1_last_st(), 0.2, 'uhl1_last_st') # expected: something small
-    compare_truedist_vs_bound(uhl1(), uhl1_add_st(), 0.2, 'uhl1_add_st') # expected: something small
-    compare_truedist_vs_bound(uhl1(), uhl1_remove_st(), 0.2, 'uhl1_remove_st') # expected: something small but bigger
+    #compare_truedist_vs_bound(toy_pdfa3(), toy_pdfa5(), 0.2, 'example1') # expected: 0.4
+    #compare_truedist_vs_bound(uhl1(), uhl1_first_st(), 0.2, 'uhl1_first_st') # expected: something big
+    #compare_truedist_vs_bound(uhl1(), uhl1_last_st(), 0.2, 'uhl1_last_st') # expected: something small
+    #compare_truedist_vs_bound(uhl1(), uhl1_add_st(), 0.2, 'uhl1_add_st') # expected: something small
+    #compare_truedist_vs_bound(uhl1(), uhl1_remove_st(), 0.2, 'uhl1_remove_st') # expected: something small but bigger
 
 def compare_truedist_vs_bound(M, N, alpha, filename):
     dist, count = compute_d(M, N, alpha, filename)
     n = len(N.check_reachable_states())
     test_words = get_vasilevskii_test_set(M, n)
-    print(f'test words: {test_words}')
+    Logger.log(f'test words: {test_words}')
     upper_bound = bound_d(M, N, '', alpha, test_words, True)
-
-    f = open(resultfolder+filename+'/log.txt', 'w')
     msg = f'M: {M.informal_name}, N: {N.informal_name}\nestimated distance (upper bound): {upper_bound}\nactual distance: {dist}, found after {count} iterations'
-    f.write(msg)
-    print(msg)
-    f.close()
+    Logger.log(msg)
+    return upper_bound, dist
 
 
 def bound_d(M, N, w, alpha, test_words, is_upper_bound):
@@ -74,7 +106,7 @@ def compute_d(M, N, alpha, filename):
         for M_state_row in range(len(distances)):
             for N_state_col in range(len(distances[M_state_row])):
                 old_dist = distances[M_state_row][N_state_col]
-                max_next_dist = find_max_next_dist(M_state_row, N_state_col, distances, M_states, N_states, M, N)
+                max_next_dist = find_max_next_dist(M_state_row, N_state_col, distances, M, N)
                 qM = M_states[M_state_row]
                 qN = N_states[N_state_col]
                 distances[M_state_row][N_state_col] = alpha*rho_pdfas(M, N, qM, qN) + (1 - alpha)*max_next_dist
@@ -84,7 +116,9 @@ def compute_d(M, N, alpha, filename):
     
     return distances[0][0], count # d(qM0, qN0) distance between initial states of M, N
 
-def find_max_next_dist(qM, qN, distances, M_states, N_states, M, N):
+def find_max_next_dist(qM, qN, distances, M, N):
+    M_states = list(M.check_reachable_states())
+    N_states = list(N.check_reachable_states())
     # maybe the worst case is if we see the stop symbol and stay in this state
     # TODO: should we do this case?
     #biggest = distances[M_states.index(qM)][M_states.index(qN)]
@@ -124,4 +158,26 @@ def toy_pdfa(): # just a small pdfa to test that the spanning tree is done corre
         transition_weights[i]={a:0.75,b:0.15}
     return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
 
+
+class Logger():
+    def __init__(self, path):
+        self.logfile = open(path,"w+")
+    def log(self, msg):
+        print(msg)
+        self.logfile.write(msg)
+
+start_time = time.time()
+resultpath = 'results/' + datetime.now().strftime("%Y-%m-%d_%Hh%Mm%S")
+try:
+    os.mkdir(resultpath)
+    logfilepath = f'{resultpath}/log.txt'
+    logger = Logger(logfilepath)
+
+except OSError:
+    print(OSError.errno)
+    print('Could not create results directory!')
+
 main()
+
+elapsed_time = time.time() - start_time
+logger.log(f'\ntime elapsed: {elapsed_time}')

@@ -70,7 +70,6 @@ def toy_pdfa5():
     transition_weights[1]={a:0.25,b:0.75}
     return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
 
-
 def toy_pdfa6(): 
     informal_name = "toy_pdfa6"
     transitions = {}
@@ -187,6 +186,28 @@ def uhl1_last_st():
     transition_weights[sum(range(2,max_as+2))-1]={a:0.14,b:0.76}
     return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
 
+def toy_pdfa13():
+    informal_name = "toy_pdfa13"
+    transitions = {}
+    transition_weights = {}
+    
+    alphabet = [0,1,2]
+    a, b, c = alphabet
+    transitions[0] = {a: 0, b: 0, c:0}
+    transition_weights[0]={a:0.1,b:0.4,c:0.5}
+    return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
+
+def toy_pdfa14():
+    informal_name = "toy_pdfa14"
+    transitions = {}
+    transition_weights = {}
+    
+    alphabet = [0,1,2]
+    a, b, c = alphabet
+    transitions[0] = {a: 0, b: 0, c:0}
+    transition_weights[0]={a:0.0,b:0.7,c:0.3}
+    return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
+
 def uhl1_first_st():
     max_as=3
     informal_name = "uhl1_first_st"
@@ -235,6 +256,24 @@ def uhl1_remove_st():
     alphabet = [0,1]
     a,b = alphabet
     for i in range(sum(range(2,max_as+2)) - 1):
+        transitions[i]={a:i+1,b:i+1}
+        transition_weights[i]={a:0.75,b:0.15} 
+    transitions[i]={a:0,b:0} # last one needs to loop back
+    j=0
+    for i in range(1,max_as+1):
+        j+=i # skip the as
+        transition_weights[j]={a:0.15,b:0.75} # places where b is higher
+        j+=1 # skip the b
+    return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
+
+def toy_pdfa_10states():
+    informal_name = "toy_10states"
+    transitions = {}
+    transition_weights = {}
+
+    alphabet = [0,1]
+    a,b = alphabet
+    for i in range(sum(range(2,max_as+2)) + 1):
         transitions[i]={a:i+1,b:i+1}
         transition_weights[i]={a:0.75,b:0.15} 
     transitions[i]={a:0,b:0} # last one needs to loop back
