@@ -1,45 +1,133 @@
 import numpy as np
-from toy_pdfa import toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7, toy_pdfa8, toy_pdfa9, toy_pdfa10, toy_pdfa11, toy_pdfa12, uhl1_last_st, uhl1_first_st, uhl1_add_st, uhl1_remove_st
+from toy_pdfa import toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7, toy_pdfa8, toy_pdfa9, toy_pdfa10, toy_pdfa11, toy_pdfa12, uhl1_last_st, uhl1_first_st, uhl1_add_st, uhl1_remove_st, toy_pdfa_10statesA, toy_pdfa_10statesB
 from our_grammars import uhl1, uhl2, uhl3
 from bound_metric import get_vasilevskii_test_set
 resultfolder = 'results/compute_metric/'
 
+# TODO dict with shorter names
 CHG_NSTATES = 'number of states'
 CHG_DIST_ALL = 'next state distribution of all states by 0.01'
 CHG_DIST_ONE = 'next state distribution of one state by 0.01'
+change_types = [CHG_NSTATES, CHG_DIST_ALL, CHG_DIST_ONE]
 
-def d_as_difference_increases(M, changetype):
-    upper_bounds, true_dists, x = [], [], []
-    for i in range (10):
-        N = get_modified_aut(M, i, changetype)
-        upper_bound, true_dist = compare_truedist_vs_bound(M, N, 0.2, f'{M.informal_name}_{changetype}_{i}')
-        upper_bounds.append(upper_bound)
-        true_dists.append(true_dist)
-        x.append(i)
-    Logger.log(f'Results as we modify the {changetype}:\nUpper bounds: {upper_bounds} \nTrue distances: {true_dists}')
-    # TODO plot x, y and save
+def plot_results(result):
+    pass # TODO
 
+
+def plot_6(alpha):
+    steps = 10
+    Ms = [toy_pdfa_10statesA(), toy_pdfa_10statesB(), uhl1(), uhl2(), uhl3()]
+    results = []
+    for change_type in change_types:
+        results.append(d_as_difference_increases(Ms, change_type, steps, alpha))
+
+        M = Ms[0] # TODO decide which
+        results.append(delta_as_difference_increases(M, change_type, steps, alpha))
+    
+    for result in results:
+        plot_results(result)
+
+
+# d between M and different variations of it
+def d_as_difference_increases(Ms, changetype, steps, alpha):
+    results = []
+    for M in Ms:
+        bounds, actual_vals = [], []
+        for i in range (steps):
+            N = get_modified_aut(M, i, changetype)
+            upper_bound, true_dist = compare_truedist_vs_bound(M, N, alpha, f'{M.informal_name}_{changetype}_{i}')
+            bounds.append(upper_bound)
+            actual_vals.append(true_dist)
+            x.append(i)
+        Logger.log(f'Results as we modify the {changetype}:\nUpper bounds: {upper_bounds} \nTrue distances: {true_dists}')
+        results.append({'label': f'M = {M.informal_name}', 'type': 'bound', 'data': bounds})
+        results.append({'label': f'M = {M.informal_name}', 'type': 'actual', 'data': actual_vals})
+    gname = f'Graph of distances between M and its modified versions. Each incremental modification of M reduces the {changetype}'
+    sname = f'd_{changetype}'
+    return {'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'd'}
+
+
+# difference in predictions, for different words, for M and different variations of it
+def delta_as_difference_increases(M, changetype, steps, alpha):
+    ws = ['a', 'aa', 'aaa'] # TODO decide which
+    results = []
+    for w in ws:
+        bounds, actual_vals = [], []
+        for i in range (steps):
+            N = get_modified_aut(M, i, changetype)
+            n = len(N.check_reachable_states())
+            test_words = get_vasilevskii_test_set(M, n)
+            upper_bound = bound_d(M, N, '', alpha, test_words, True)
+            bounds.append(get_delta_w_bound(upper_bound, alpha))
+            actual_vals.append(get_delta_w_actual(M, N, w, alpha))
+        results.append({'label': f'w = {w}', 'type': 'bound', 'data': bounds})
+        results.append({'label': f'w = {w}', 'type': 'actual', 'data': actual_vals})
+    gname = f'Graph of discrepancy between the outputs of {M.informal_name} and its modified versions as we read different input words. Each incremental modification of M reduces the {changetype}'
+    sname = f'delta_{M.informal_name}_{changetype}'
+    return 'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'discr(w)'}
+    
+
+# TODO test all 3 cases
 def get_modified_aut(M, i, changetype):
-    if changetype == CHG_NSTATES: # TODO make reduced automata with i less states
-        pass
-    elif changetype == CHG_DIST_ALL: # TODO make reduced automata with all state dist changed by 0.01 * i
-        pass
-    elif changetype == CHG_DIST_ONE:  # TODO make reduced automata with furthest state from start dist changed by 0.01 * i
-        pass
-    N = 2 
-    return N
+    M_states = list(M.check_reachable_states())
+    n = len(M_states)
+    informal_name = f'{M.informal_name}_{i}_{changetype}'
+    transitions = {}
+    transition_weights = {}
+    alphabet = M.internal_alphabet
+            
+    for state in range(n):
+        if changetype == CHG_NSTATES:
+ 
+            if state < n - i:
+                transitions[state] = M.transitions[state]
+                transition_weights[state]=M.transitions[state]
 
+                # to remove the states, we're just going to reroute all their incoming transitions to their outgoing transitions
+                for symbol in M.input_alphabet:
+                    if M.transitions[state][symbol] >= n - i:
+                        removed_state = M.transitions[state][symbol]
+                        transitions[state][symbol] = M.transitions[removed_state][symbol]
+
+                        # if still pointing to the removed state, then just loop back to itself
+                        if transitions[state][symbol] == removed_state:
+                            transitions[state][symbol] = state
+                
+        elif changetype == CHG_DIST_ALL:
+            transitions[state] = M.transitions[state]
+            transition_weights[state]=M.transitions[state]
+            transition_weights[state][alphabet[0]] += i * 0.01
+            transition_weights[state][alphabet[-1]] -= i * 0.01
+
+        elif changetype == CHG_DIST_ONE:
+            transitions[state] = M.transitions[state]
+            transition_weights[state]=M.transitions[state]
+            if state == n - 1:
+                transition_weights[state][alphabet[0]] += i * 0.01
+                transition_weights[state][alphabet[-1]] -= i * 0.01
+
+    return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
+
+
+def get_delta_w_bound(upper_bound, alpha)):
+    return upper_bound/alpha
+
+
+# TODO test
+# discounted sum of discrepancies between M and N as we read w
+def get_delta_w_actual(M, N, w, alpha):
+    sum = 0
+    for i in range(len(w)):
+        w_ints = tuple(map(int, list(w[0:i])))
+        qM = M.state_after_word(w_ints)
+        qN = N.state_after_word(w_ints)
+        sum += rho_pdfas(M, N, qM, qN) * (1 - alpha)**i
+    return sum
 
 
 def main():
-    M = 1 # TODO: 10-state automata: one like tree, one like cycles
-    d_as_difference_increases(M, CHG_NSTATES)
-    d_as_difference_increases(M, CHG_DIST_ALL)
-    d_as_difference_increases(M, CHG_DIST_ONE)
-    M = 2 # TODO
-    d_as_difference_increases(M, CHG_NSTATES)
-    d_as_difference_increases(M, CHG_DIST_ALL)
-    d_as_difference_increases(M, CHG_DIST_ONE)
+    alpha = 0.2
+    plot_6(alpha)
     
     # compute_d(toy_pdfa6(), toy_pdfa7(), 0.2, 'example3') # expected: 0.4444444444444445
     # compute_d(toy_pdfa6(), toy_pdfa8(), 0.2, 'example4') # expected: 0.5555555555555556

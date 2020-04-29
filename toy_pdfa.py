@@ -266,20 +266,43 @@ def uhl1_remove_st():
         j+=1 # skip the b
     return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
 
-def toy_pdfa_10states():
-    informal_name = "toy_10states"
+def toy_pdfa_10statesA():
+    informal_name = "10_states_A"
     transitions = {}
     transition_weights = {}
 
-    alphabet = [0,1]
-    a,b = alphabet
-    for i in range(sum(range(2,max_as+2)) + 1):
-        transitions[i]={a:i+1,b:i+1}
-        transition_weights[i]={a:0.75,b:0.15} 
-    transitions[i]={a:0,b:0} # last one needs to loop back
-    j=0
-    for i in range(1,max_as+1):
-        j+=i # skip the as
-        transition_weights[j]={a:0.15,b:0.75} # places where b is higher
-        j+=1 # skip the b
+    alphabet = [0,1,2]
+    a,b,c = alphabet
+    transitions[0] = {a: 1, b: 2, c:3}
+    transitions[1] = {a: 1, b: 1, c:1}
+    transitions[2] = {a: 4, b: 5, c:6}
+    transitions[3] = {a: 7, b: 8, c:0}
+    transitions[4] = {a: 4, b: 4, c:4}
+    transitions[5] = {a: 4, b: 5, c:5}
+    transitions[6] = {a: 9, b: 7, c:3}
+    transitions[7] = {a: 7, b: 7, c:7}
+    transitions[8] = {a: 8, b: 8, c:8}
+    transitions[9] = {a: 9, b: 9, c:9}
+    for i in range(10):
+        transition_weights[i]={a:0.25,b:0.25,c:0.5}
+    transition_weights[4]={a:0.5,b:0.25,c:0.25}
+    transition_weights[7]={a:0.25,b:0.5,c:0.25}
+    transition_weights[8]={a:0.0,b:0.5,c:0.5}
+    transition_weights[9]={a:0.5,b:0.0,c:0.5}
+    return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
+
+    def toy_pdfa_10statesB():
+    informal_name = "10_states_B"
+    transitions = {}
+    transition_weights = {}
+
+    alphabet = [0,1,2]
+    a,b,c = alphabet
+    n = 10
+    for i in range(n):
+        transitions[i] = {a: (i+1)%n, b: (i+2)%n, c: (i-1)%n}
+        if (i % 3 == 0):
+            transition_weights[i]={a:0.25,b:0.25,c:0.5}
+        else:
+            transition_weights[i]={a:0.5,b:0.25,c:0.25}
     return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
