@@ -1,7 +1,9 @@
 import numpy as np
-from toy_pdfa import toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7, toy_pdfa8, toy_pdfa9, toy_pdfa10, toy_pdfa11, toy_pdfa12, uhl1_last_st, uhl1_first_st, uhl1_add_st, uhl1_remove_st, toy_pdfa_10statesA, toy_pdfa_10statesB
+from toy_pdfa import toy_pdfa6, toy_pdfa12, uhl1_last_st, uhl1_first_st, uhl1_add_st, uhl1_remove_st, toy_pdfa_10statesA, toy_pdfa_10statesB
 from our_grammars import uhl1, uhl2, uhl3
 from bound_metric import get_vasilevskii_test_set
+import time, os
+from datetime import datetime
 resultfolder = 'results/compute_metric/'
 
 # TODO dict with shorter names
@@ -35,7 +37,8 @@ def d_as_difference_increases(Ms, changetype, steps, alpha):
         bounds, actual_vals = [], []
         for i in range (steps):
             N = get_modified_aut(M, i, changetype)
-            upper_bound, true_dist = compare_truedist_vs_bound(M, N, alpha, f'{M.informal_name}_{changetype}_{i}')
+            upper_bound, true_dist, msg = compare_truedist_vs_bound(M, N, alpha, f'{M.informal_name}_{changetype}_{i}')
+            Logger.log(msg)
             bounds.append(upper_bound)
             actual_vals.append(true_dist)
             x.append(i)
@@ -64,7 +67,7 @@ def delta_as_difference_increases(M, changetype, steps, alpha):
         results.append({'label': f'w = {w}', 'type': 'actual', 'data': actual_vals})
     gname = f'Graph of discrepancy between the outputs of {M.informal_name} and its modified versions as we read different input words. Each incremental modification of M reduces the {changetype}'
     sname = f'delta_{M.informal_name}_{changetype}'
-    return 'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'discr(w)'}
+    return {'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'discr(w)'}
     
 
 # TODO test all 3 cases
@@ -109,7 +112,7 @@ def get_modified_aut(M, i, changetype):
     return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
 
 
-def get_delta_w_bound(upper_bound, alpha)):
+def get_delta_w_bound(upper_bound, alpha):
     return upper_bound/alpha
 
 
@@ -129,17 +132,11 @@ def main():
     alpha = 0.2
     plot_6(alpha)
     
-    # compute_d(toy_pdfa6(), toy_pdfa7(), 0.2, 'example3') # expected: 0.4444444444444445
-    # compute_d(toy_pdfa6(), toy_pdfa8(), 0.2, 'example4') # expected: 0.5555555555555556
-    # compute_d(toy_pdfa9(), toy_pdfa10(), 0.2, 'example5') # expected: 0.4
-    # compute_d(toy_pdfa6(), toy_pdfa11(), 0.2, 'example8') # expected: 0.3555555555555556
-    # compute_d(toy_pdfa6(), toy_pdfa12(), 0.2, 'example9') # expected: 0.2622950819672131
     # compute_d(uhl1(), toy_pdfa12(), 0.2, 'example10') # expected: ?
     # compute_d(uhl1(), uhl3(), 0.2, 'example11') # expected: ?
     # compute_d(toy_pdfa6(), uhl1(), 0.2, 'example12') # expected: ?
 
     # same, but on the last state, the transition probabilities are changed by 0.01
-    #compare_truedist_vs_bound(toy_pdfa3(), toy_pdfa5(), 0.2, 'example1') # expected: 0.4
     #compare_truedist_vs_bound(uhl1(), uhl1_first_st(), 0.2, 'uhl1_first_st') # expected: something big
     #compare_truedist_vs_bound(uhl1(), uhl1_last_st(), 0.2, 'uhl1_last_st') # expected: something small
     #compare_truedist_vs_bound(uhl1(), uhl1_add_st(), 0.2, 'uhl1_add_st') # expected: something small
@@ -149,11 +146,9 @@ def compare_truedist_vs_bound(M, N, alpha, filename):
     dist, count = compute_d(M, N, alpha, filename)
     n = len(N.check_reachable_states())
     test_words = get_vasilevskii_test_set(M, n)
-    Logger.log(f'test words: {test_words}')
     upper_bound = bound_d(M, N, '', alpha, test_words, True)
     msg = f'M: {M.informal_name}, N: {N.informal_name}\nestimated distance (upper bound): {upper_bound}\nactual distance: {dist}, found after {count} iterations'
-    Logger.log(msg)
-    return upper_bound, dist
+    return upper_bound, dist, msg
 
 
 def bound_d(M, N, w, alpha, test_words, is_upper_bound):
@@ -265,7 +260,7 @@ except OSError:
     print(OSError.errno)
     print('Could not create results directory!')
 
-main()
+#main()
 
 elapsed_time = time.time() - start_time
 logger.log(f'\ntime elapsed: {elapsed_time}')

@@ -291,7 +291,7 @@ def toy_pdfa_10statesA():
     transition_weights[9]={a:0.5,b:0.0,c:0.5}
     return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
 
-    def toy_pdfa_10statesB():
+def toy_pdfa_10statesB():
     informal_name = "10_states_B"
     transitions = {}
     transition_weights = {}
