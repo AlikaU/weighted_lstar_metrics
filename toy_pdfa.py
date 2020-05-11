@@ -275,20 +275,33 @@ def toy_pdfa_10statesA():
     a,b,c = alphabet
     transitions[0] = {a: 1, b: 2, c:3}
     transitions[1] = {a: 1, b: 1, c:1}
-    transitions[2] = {a: 4, b: 5, c:6}
+    transitions[2] = {a: 4, b: 5, c:9}
     transitions[3] = {a: 7, b: 8, c:0}
     transitions[4] = {a: 4, b: 4, c:4}
-    transitions[5] = {a: 4, b: 5, c:5}
-    transitions[6] = {a: 9, b: 7, c:3}
+    transitions[5] = {a: 4, b: 6, c:5}
+    transitions[9] = {a: 3, b: 7, c:3}
     transitions[7] = {a: 7, b: 7, c:7}
     transitions[8] = {a: 8, b: 8, c:8}
-    transitions[9] = {a: 9, b: 9, c:9}
-    for i in range(10):
-        transition_weights[i]={a:0.25,b:0.25,c:0.5}
-    transition_weights[4]={a:0.5,b:0.25,c:0.25}
-    transition_weights[7]={a:0.25,b:0.5,c:0.25}
-    transition_weights[8]={a:0.0,b:0.5,c:0.5}
-    transition_weights[9]={a:0.5,b:0.0,c:0.5}
+    transitions[6] = {a: 6, b: 6, c:6}
+    
+    transition_weights[0] = {a: 0.1, b: 0.3, c: 0.6}
+    transition_weights[1] = {a: 0.2, b: 0.3, c: 0.5}
+    transition_weights[2] = {a: 0.3, b: 0.3, c: 0.4}
+    transition_weights[3] = {a: 0.4, b: 0.3, c: 0.3}
+    transition_weights[4] = {a: 0.5, b: 0.3, c: 0.2}
+    transition_weights[5] = {a: 0.6, b: 0.3, c: 0.1}
+    transition_weights[9] = {a: 0.5, b: 0.4, c: 0.1}
+    transition_weights[7] = {a: 0.4, b: 0.5, c: 0.1}
+    transition_weights[8] = {a: 0.3, b: 0.6, c: 0.1}
+    transition_weights[6] = {a: 0.3, b: 0.5, c: 0.2}
+    
+    # for i in range(10):
+    #     transition_weights[i]={a:0.25,b:0.25,c:0.5}
+    # transition_weights[1]={a:0,b:0,c:1}
+    # transition_weights[4]={a:0.5,b:0.25,c:0.25}
+    # transition_weights[7]={a:0.25,b:0.5,c:0.25}
+    # transition_weights[8]={a:0.0,b:0.5,c:0.5}
+    # transition_weights[9]={a:0.5,b:0.0,c:0.5}
     return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
 
 def toy_pdfa_10statesB():

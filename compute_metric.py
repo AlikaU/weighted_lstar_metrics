@@ -1,136 +1,26 @@
-import numpy as np
+import numpy as np, math
 from toy_pdfa import toy_pdfa6, toy_pdfa12, uhl1_last_st, uhl1_first_st, uhl1_add_st, uhl1_remove_st, toy_pdfa_10statesA, toy_pdfa_10statesB
 from our_grammars import uhl1, uhl2, uhl3
 from bound_metric import get_vasilevskii_test_set
+from our_grammars import assert_and_give_pdfa
 import time, os
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 from datetime import datetime
 resultfolder = 'results/compute_metric/'
+log_results = False
 
-# TODO dict with shorter names
-CHG_NSTATES = 'number of states'
-CHG_DIST_ALL = 'next state distribution of all states by 0.01'
-CHG_DIST_ONE = 'next state distribution of one state by 0.01'
-change_types = [CHG_NSTATES, CHG_DIST_ALL, CHG_DIST_ONE]
-
-def plot_results(result):
-    pass # TODO
-
-
-def plot_6(alpha):
-    steps = 10
-    Ms = [toy_pdfa_10statesA(), toy_pdfa_10statesB(), uhl1(), uhl2(), uhl3()]
-    results = []
-    for change_type in change_types:
-        results.append(d_as_difference_increases(Ms, change_type, steps, alpha))
-
-        M = Ms[0] # TODO decide which
-        results.append(delta_as_difference_increases(M, change_type, steps, alpha))
-    
-    for result in results:
-        plot_results(result)
-
-
-# d between M and different variations of it
-def d_as_difference_increases(Ms, changetype, steps, alpha):
-    results = []
-    for M in Ms:
-        bounds, actual_vals = [], []
-        for i in range (steps):
-            N = get_modified_aut(M, i, changetype)
-            upper_bound, true_dist, msg = compare_truedist_vs_bound(M, N, alpha, f'{M.informal_name}_{changetype}_{i}')
-            Logger.log(msg)
-            bounds.append(upper_bound)
-            actual_vals.append(true_dist)
-            x.append(i)
-        Logger.log(f'Results as we modify the {changetype}:\nUpper bounds: {upper_bounds} \nTrue distances: {true_dists}')
-        results.append({'label': f'M = {M.informal_name}', 'type': 'bound', 'data': bounds})
-        results.append({'label': f'M = {M.informal_name}', 'type': 'actual', 'data': actual_vals})
-    gname = f'Graph of distances between M and its modified versions. Each incremental modification of M reduces the {changetype}'
-    sname = f'd_{changetype}'
-    return {'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'd'}
-
-
-# difference in predictions, for different words, for M and different variations of it
-def delta_as_difference_increases(M, changetype, steps, alpha):
-    ws = ['a', 'aa', 'aaa'] # TODO decide which
-    results = []
-    for w in ws:
-        bounds, actual_vals = [], []
-        for i in range (steps):
-            N = get_modified_aut(M, i, changetype)
-            n = len(N.check_reachable_states())
-            test_words = get_vasilevskii_test_set(M, n)
-            upper_bound = bound_d(M, N, '', alpha, test_words, True)
-            bounds.append(get_delta_w_bound(upper_bound, alpha))
-            actual_vals.append(get_delta_w_actual(M, N, w, alpha))
-        results.append({'label': f'w = {w}', 'type': 'bound', 'data': bounds})
-        results.append({'label': f'w = {w}', 'type': 'actual', 'data': actual_vals})
-    gname = f'Graph of discrepancy between the outputs of {M.informal_name} and its modified versions as we read different input words. Each incremental modification of M reduces the {changetype}'
-    sname = f'delta_{M.informal_name}_{changetype}'
-    return {'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'discr(w)'}
-    
-
-# TODO test all 3 cases
-def get_modified_aut(M, i, changetype):
-    M_states = list(M.check_reachable_states())
-    n = len(M_states)
-    informal_name = f'{M.informal_name}_{i}_{changetype}'
-    transitions = {}
-    transition_weights = {}
-    alphabet = M.internal_alphabet
-            
-    for state in range(n):
-        if changetype == CHG_NSTATES:
- 
-            if state < n - i:
-                transitions[state] = M.transitions[state]
-                transition_weights[state]=M.transitions[state]
-
-                # to remove the states, we're just going to reroute all their incoming transitions to their outgoing transitions
-                for symbol in M.input_alphabet:
-                    if M.transitions[state][symbol] >= n - i:
-                        removed_state = M.transitions[state][symbol]
-                        transitions[state][symbol] = M.transitions[removed_state][symbol]
-
-                        # if still pointing to the removed state, then just loop back to itself
-                        if transitions[state][symbol] == removed_state:
-                            transitions[state][symbol] = state
-                
-        elif changetype == CHG_DIST_ALL:
-            transitions[state] = M.transitions[state]
-            transition_weights[state]=M.transitions[state]
-            transition_weights[state][alphabet[0]] += i * 0.01
-            transition_weights[state][alphabet[-1]] -= i * 0.01
-
-        elif changetype == CHG_DIST_ONE:
-            transitions[state] = M.transitions[state]
-            transition_weights[state]=M.transitions[state]
-            if state == n - 1:
-                transition_weights[state][alphabet[0]] += i * 0.01
-                transition_weights[state][alphabet[-1]] -= i * 0.01
-
-    return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
-
-
-def get_delta_w_bound(upper_bound, alpha):
-    return upper_bound/alpha
-
-
-# TODO test
-# discounted sum of discrepancies between M and N as we read w
-def get_delta_w_actual(M, N, w, alpha):
-    sum = 0
-    for i in range(len(w)):
-        w_ints = tuple(map(int, list(w[0:i])))
-        qM = M.state_after_word(w_ints)
-        qN = N.state_after_word(w_ints)
-        sum += rho_pdfas(M, N, qM, qN) * (1 - alpha)**i
-    return sum
-
+change_types = {
+    'chg_nstates': 'number of states',
+    'chg_dist_all': 'next state distribution of all states by 0.01',
+    'chg_dist_one': 'next state distribution of one state by 0.01'
+}
 
 def main():
+    log_results = True
     alpha = 0.2
-    plot_6(alpha)
+    steps = 2
+    plot_6(alpha, steps)
     
     # compute_d(uhl1(), toy_pdfa12(), 0.2, 'example10') # expected: ?
     # compute_d(uhl1(), uhl3(), 0.2, 'example11') # expected: ?
@@ -141,6 +31,172 @@ def main():
     #compare_truedist_vs_bound(uhl1(), uhl1_last_st(), 0.2, 'uhl1_last_st') # expected: something small
     #compare_truedist_vs_bound(uhl1(), uhl1_add_st(), 0.2, 'uhl1_add_st') # expected: something small
     #compare_truedist_vs_bound(uhl1(), uhl1_remove_st(), 0.2, 'uhl1_remove_st') # expected: something small but bigger
+
+
+# result is one chg_type with either d_as_difference_increases or delta_as_difference_increases
+# both objects are structured like so:
+# y axis: bounds, actual_vals
+# x axis: assumed to be i in range (steps)
+def plot_results(result, steps):
+    colors = {'tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan'}
+    mpl.style.use('seaborn')
+    print(result)
+    x = list(range(steps))
+    # line_labels = ['NB', 'LR']
+    for i, res in enumerate(result['results']):
+        y = res['data']
+        lbl = res['label']
+        line_style = '--' if res['type']=='bound' else '-' 
+        clr = f'C{math.floor(i/2.0)}'
+
+        plt.plot(x, y, line_style, color=clr, label=lbl)
+ 
+    
+    #plt.grid(b=True, which='major', color='#666666', linestyle='-', alpha=0.4)
+    plt.minorticks_on()
+    #plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
+    #     plt.ylim(0.5, 1)
+
+    #     plt.ylabel(f'test accuracy')
+    #     if (i == 1): plt.xlabel('percentage of train set used')
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=3, fancybox=True, shadow=True)
+    plt.xlabel(result['xlabel'])
+    plt.ylabel(result['ylabel'])
+    plt.tight_layout()
+    #plt.suptitle(result['graph_name'])
+    plt.text(5, 10, result['graph_name'], ha='center', va='bottom', wrap=True)
+    sn = result['short_name']
+    results_filename = f'{resultpath}/{sn}.png'
+    plt.savefig(results_filename)
+    plt.close()
+
+
+def plot_6(alpha, steps):
+    Ms = [toy_pdfa_10statesA(), toy_pdfa_10statesB(), uhl1(), uhl2(), uhl3()]
+    results = []
+    for change_type in change_types:
+        results.append(d_as_difference_increases(Ms, change_type, steps, alpha))
+
+        M = Ms[0] # TODO decide which
+        results.append(delta_as_difference_increases(M, change_type, steps, alpha))
+    
+    for result in results:
+        plot_results(result, steps)
+
+
+# d between M and different variations of it
+def d_as_difference_increases(Ms, changetype, steps, alpha):
+    results = []
+    for M in Ms:
+        bounds, actual_vals = [], []
+        for i in range (steps):
+            N = get_modified_aut(M, i, changetype)
+            upper_bound, true_dist, msg = compare_truedist_vs_bound(M, N, alpha, f'{M.informal_name}_{changetype}_{i}')
+            logger.log(msg)
+            bounds.append(upper_bound)
+            actual_vals.append(true_dist)
+        logger.log(f'Results as we modify the {changetype}:\nUpper bounds: {bounds} \nTrue distances: {actual_vals}')
+        results.append({'label': f'M = {M.informal_name}, bound', 'type': 'bound', 'data': bounds})
+        results.append({'label': f'M = {M.informal_name}, actual', 'type': 'actual', 'data': actual_vals})
+    gname = f'Graph of distances between M and its modified versions. Each incremental modification of M reduces the {changetype}'
+    sname = f'd_{changetype}'
+    return {'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'd'}
+
+
+# difference in predictions, for different words, for M and different variations of it
+def delta_as_difference_increases(M, changetype, steps, alpha):
+    ws = ['0', '00', '000'] # TODO decide which
+    results = []
+    for w in ws:
+        bounds, actual_vals = [], []
+        for i in range (steps):
+            N = get_modified_aut(M, i, changetype)
+            n = len(N.check_reachable_states())
+            test_words = get_vasilevskii_test_set(M, n)
+            upper_bound = bound_d(M, N, '', alpha, test_words, True)
+            bounds.append(get_delta_w_bound(upper_bound, alpha))
+            actual_vals.append(get_delta_w_actual(M, N, w, alpha))
+        results.append({'label': f'w = {w}, bound', 'type': 'bound', 'data': bounds})
+        results.append({'label': f'w = {w}, actual', 'type': 'actual', 'data': actual_vals})
+    gname = f'Graph of discrepancy between the outputs of {M.informal_name} and its modified versions as we read different input words. Each incremental modification of M reduces the {change_types[changetype]}'
+    sname = f'delta_{M.informal_name}_{changetype}'
+    return {'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'discr(w)'}
+
+
+def get_modified_aut(M, i, changetype):
+    M_states = list(M.check_reachable_states())
+    n = len(M_states)
+    informal_name = f'{M.informal_name}_{i}_{changetype}'
+    transitions = {}
+    transition_weights = {}
+    alphabet = list(M.internal_alphabet)
+    alphabet.remove('EOS')
+    alphabet = tuple(alphabet)
+
+    for j in range(n):
+        transition_weights[j] = {}
+        transitions[j] = {}
+        for symbol in alphabet:        
+            transition_weights[j][symbol]=M.transition_weights[j][symbol]
+            transitions[j][symbol] = M.transitions[j][symbol]
+
+    if changetype == 'chg_nstates':
+        nstates = n
+        for idx in range(i):
+            transitions = remove_one_state(transitions, nstates, alphabet)
+            nstates -= 1
+          
+    else:
+        for state in range(n):
+            transitions[state] = M.transitions[state]
+
+            if changetype == 'chg_dist_all':
+                transition_weights[state][alphabet[0]] += i * 0.01
+                transition_weights[state][alphabet[-1]] -= i * 0.01
+
+            elif changetype == 'chg_dist_one':
+                if state == n - 1:
+                    transition_weights[state][alphabet[0]] += i * 0.01
+                    transition_weights[state][alphabet[-1]] -= i * 0.01
+
+    return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
+
+
+def remove_one_state(transitions, nstates, alphabet):
+    to_remove = nstates - 1
+    for state in range (nstates):
+        for symbol in alphabet:
+            if transitions[state][symbol] == to_remove:
+                transitions[state][symbol] = transitions[to_remove][symbol]
+            # if it still points to removed state, then loop back to itself
+            if transitions[state][symbol] == to_remove:
+                transitions[state][symbol] = state
+    del transitions[to_remove]
+    return transitions
+
+def get_delta_w_bound(upper_bound, alpha):
+    return upper_bound/alpha
+
+def str_to_ints(M, w):
+    # res = []
+    # for char in w:
+    #     res.append(M.char2int[char])
+    # return res
+    return tuple(map(int, list(w)))
+
+
+# discounted sum of discrepancies between M and N as we read w
+def get_delta_w_actual(M, N, w, alpha):
+    sum = 0
+    w = str_to_ints(M, w)
+    for i in range(len(w) + 1):
+        w_subs = w[0:i]
+        #w_ints = tuple(map(int, list(w[0:i])))
+        qM = M.state_after_word(w_subs)
+        qN = N.state_after_word(w_subs)
+        sum += rho_pdfas(M, N, qM, qN) * (1 - alpha)**i
+    return sum
+
 
 def compare_truedist_vs_bound(M, N, alpha, filename):
     dist, count = compute_d(M, N, alpha, filename)
@@ -175,7 +231,7 @@ def bound_d(M, N, w, alpha, test_words, is_upper_bound):
 # in: M, N, accuracy thershold maybe
 def compute_d(M, N, alpha, filename):
     M.draw_nicely(keep=True,filename=resultfolder+filename+'/M')
-    N.draw_nicely(keep=True,filename=resultfolder+filename+'/N')
+    N.draw_nicely(keep=True,filename=f'{resultfolder}{filename}/{N.informal_name}')
     M_states = list(M.check_reachable_states())
     N_states = list(N.check_reachable_states())
     distances = np.zeros((len(M_states), len(N_states)))
@@ -244,10 +300,12 @@ def toy_pdfa(): # just a small pdfa to test that the spanning tree is done corre
 
 class Logger():
     def __init__(self, path):
-        self.logfile = open(path,"w+")
+        if log_results:
+            self.logfile = open(path,"w+")
     def log(self, msg):
         print(msg)
-        self.logfile.write(msg)
+        if log_results:
+            self.logfile.write(msg)
 
 start_time = time.time()
 resultpath = 'results/' + datetime.now().strftime("%Y-%m-%d_%Hh%Mm%S")
@@ -260,7 +318,7 @@ except OSError:
     print(OSError.errno)
     print('Could not create results directory!')
 
-#main()
+main()
 
 elapsed_time = time.time() - start_time
 logger.log(f'\ntime elapsed: {elapsed_time}')
