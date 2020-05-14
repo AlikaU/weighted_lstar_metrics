@@ -2,7 +2,7 @@ from time import time, process_time
 import os
 import shutil
 import sys
-from Helper_Functions import chronological_scatter, class_to_dict, load_from_file, overwrite_file, prepare_directory, do_timed, clean_val
+from weighted_lstar.Helper_Functions import chronological_scatter, class_to_dict, load_from_file, overwrite_file, prepare_directory, do_timed, clean_val
 from random import shuffle
 import torch.nn as nn
 import torch

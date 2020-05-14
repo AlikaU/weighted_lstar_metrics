@@ -1,10 +1,10 @@
 import argparse, math, ast, os
-from Learner import learn
-from our_grammars import uhl1, uhl2, uhl3
-from Helper_Functions import prepare_directory, overwrite_file, clean_val
-from LanguageModel import LanguageModel
 from time import process_time
-from RNNTokenPredictor import RNNTokenPredictor, train_rnn, load_rnn
+from weighted_lstar.Learner import learn
+from weighted_lstar.our_grammars import uhl1, uhl2, uhl3
+from weighted_lstar.Helper_Functions import prepare_directory, overwrite_file, clean_val
+from weighted_lstar.LanguageModel import LanguageModel
+from weighted_lstar.RNNTokenPredictor import RNNTokenPredictor, train_rnn, load_rnn
 
 
 def make_spice_style_train(lm,n_samples,max_len,filename):

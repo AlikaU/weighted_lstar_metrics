@@ -1,5 +1,5 @@
-from PDFA import PDFA
-from our_grammars import assert_and_give_pdfa
+from weighted_lstar.PDFA import PDFA
+from weighted_lstar.our_grammars import assert_and_give_pdfa
 
 # small PDFA for tests
 def toy_pdfa1(): # just a small pdfa to test that the spanning tree is done correctly

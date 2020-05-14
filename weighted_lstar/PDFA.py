@@ -1,8 +1,7 @@
-import numpy as np
-from Helper_Functions import OhHeck, clean_val
-from time import time, process_time
+import os, numpy as np
 from IPython.display import display
-import os
+from time import time, process_time
+from weighted_lstar.Helper_Functions import OhHeck, clean_val
 
 
 class PDFA: #deterministic probabilistic WFA that just has the states listed out like a DFA. helper class for specific WFA things

@@ -1,10 +1,10 @@
 import numpy as np
-from Helper_Functions import OhHeck, clean_val, inverse_dict,  do_timed, overwrite_file
-from PDFA import PDFA
+from weighted_lstar.Helper_Functions import OhHeck, clean_val, inverse_dict,  do_timed, overwrite_file
+from weighted_lstar.PDFA import PDFA
 from time import process_time
 from heapq import heappush,heappop
-from KDTree import KDTree
-from LanguageModel import LanguageModel
+from weighted_lstar.KDTree import KDTree
+from weighted_lstar.LanguageModel import LanguageModel
 from scipy.sparse import lil_matrix
 from sklearn.cluster import DBSCAN
 from itertools import combinations

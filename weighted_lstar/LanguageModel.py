@@ -1,4 +1,4 @@
-from Helper_Functions import pick_index_from_distribution, steal_attr, OhHeck, prepare_directory
+from weighted_lstar.Helper_Functions import pick_index_from_distribution, steal_attr, OhHeck, prepare_directory
 import numpy as np
 from time import time
 import os

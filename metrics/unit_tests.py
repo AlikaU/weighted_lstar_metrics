@@ -1,6 +1,10 @@
-from compute_metric import rho_pdfas, compute_d, compare_truedist_vs_bound, get_modified_aut, get_delta_w_actual
-from toy_pdfa import toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7, toy_pdfa8, toy_pdfa9, toy_pdfa10, toy_pdfa_10statesA, toy_pdfa11, toy_pdfa12, toy_pdfa13, toy_pdfa14
-
+# import sys
+# sys.path.append('../')
+# print(sys.path)
+from metrics.metric import compute_d, rho_pdfas, rho_pdfas_states, compare_truedist_vs_bound 
+from metrics.metric_on_known_pdfa import get_modified_aut, get_delta_w_actual
+from metrics.toy_pdfa import toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7, toy_pdfa8, toy_pdfa9, toy_pdfa10, toy_pdfa_10statesA, toy_pdfa11, toy_pdfa12, toy_pdfa13, toy_pdfa14
+resultfolder = 'results/unit_tests/'
 # for each:
 # 1. happy path
 # 2. list the possible kinds of inputs, as well as boundaries/edge cases
@@ -9,17 +13,17 @@ from toy_pdfa import toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_
 
 # compute metric
 def main():
-    # test_rho_pdfas()
-    # test_compute_d()
-    # test_bound_d()
-    # test_compare_truedist_vs_bound()
-    #test_chg_nstates()
-    #test_chg_dist_all()
-    #test_chg_dist_one()
+    test_rho_pdfas_states()
+    test_compute_d()
+    test_bound_d()
+    test_compare_truedist_vs_bound()
+    test_chg_nstates()
+    test_chg_dist_all()
+    test_chg_dist_one()
     test_get_delta_w_actual()
 
-    #test_construct_test_words()
-    #test_get_all_words_of_len()
+    test_construct_test_words()
+    test_get_all_words_of_len()
     # TODO call the rest
 
 
@@ -56,11 +60,11 @@ def test_get_modified_aut(M, expected_ds, change_type, round_amount=4):
 
     
 
-def test_rho_pdfas():
-    assert rho_pdfas(toy_pdfa3(), toy_pdfa5(), 0, 0) == 0
-    assert rho_pdfas(toy_pdfa3(), toy_pdfa5(), 0, 1) == 0.5
-    assert rho_pdfas(toy_pdfa6(), toy_pdfa7(), 0, 1) == 1
-    assert round(rho_pdfas(toy_pdfa13(), toy_pdfa14(), 0, 0),1) == 0.3
+def test_rho_pdfas_states():
+    assert rho_pdfas_states(toy_pdfa3(), toy_pdfa5(), 0, 0) == 0
+    assert rho_pdfas_states(toy_pdfa3(), toy_pdfa5(), 0, 1) == 0.5
+    assert rho_pdfas_states(toy_pdfa6(), toy_pdfa7(), 0, 1) == 1
+    assert round(rho_pdfas_states(toy_pdfa13(), toy_pdfa14(), 0, 0),1) == 0.3
 
 def test_compute_d():
     assert compute_d(toy_pdfa6(), toy_pdfa6(), 0.2, 'example0')[0] == 0 

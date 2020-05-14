@@ -1,0 +1,138 @@
+UNMARKED = '_'
+UNUSED = '*'
+
+# options:
+# criterion: alphabetical, greedy
+def get_vasilevskii_test_set(M, n, criterion='alphabetical'):
+
+    test_words = {}
+    k = len(list(M.check_reachable_states()))
+    alphabet = M.input_alphabet
+
+    if k > n:
+        print(f"The pdfa had k={k} states, which is more than n={n}!")
+        n = k
+        print(f"Increased n to {n}")
+
+    characterizing_set = {''} # no need unless using a threshold for 'almost same states'
+    spanning_tree_words = construct_spanning_tree_words(M)
+
+    for i in range(n - k + 1):
+        all_words_of_len = get_all_words_of_len(i + 1, alphabet)
+        construct_test_words(test_words, spanning_tree_words, all_words_of_len, characterizing_set)
+    
+    for words_of_len in test_words:
+        test_words[words_of_len] = list(test_words[words_of_len])
+        test_words[words_of_len].sort()
+    return test_words
+
+
+def construct_spanning_tree_words(pdfa):
+    result = {''}
+    queue = [(pdfa._initial_state, '')]
+    visited = {pdfa._initial_state}
+
+    while len(queue) > 0:
+        (q, word) = queue.pop()
+        for s in pdfa.input_alphabet:
+            newstate = pdfa.next_state(q, pdfa.char2int[s])
+            if not newstate in visited:
+                queue.insert(0, (newstate, word + str(s)))
+                visited.add(newstate)
+                result.add(word + str(s))
+    result = list(result)
+    result.sort()
+    result.sort(key=len)
+    return result
+
+
+def try_using_existing_dstrings(pdfa, p, q, dist_strs_set, dist_strs, states):
+    ret_val = ''
+    idx_p = states.index(p)
+    idx_q = states.index(q)
+    for d_str in dist_strs_set:
+        p_st = pdfa_transition(pdfa, p, d_str)
+        q_st = pdfa_transition(pdfa, q, d_str)
+        if pdfa.transition_weights[p_st] != pdfa.transition_weights[q_st]:
+            dist_strs[idx_p][idx_q] = d_str
+            ret_val = d_str
+    return ret_val
+
+
+def get_all_words_of_len(length, alphabet):
+    queue = ['']
+    while len(queue[-1]) < length:
+        word = queue.pop()
+        for s in alphabet:
+            queue.insert(0, word + str(s))
+    queue.sort()
+    return queue
+
+
+def construct_test_words(test_words, spanning_tree_words, all_words_of_length, characterizing_set):
+    for b in all_words_of_length:
+        for a in spanning_tree_words:            
+            for c in characterizing_set:
+                new_word = a + b + c
+                if len(new_word) in test_words:
+                    test_words[len(new_word)].add(new_word)
+                else: 
+                    test_words[len(new_word)] = {new_word}
+
+
+# TODO maybe add optional threshold so can accept distributions that are 'almost same'
+# in that case, the piece of code below can be used, after being tested to make sure it works
+def construct_characterizing_set(pdfa):
+    return {''}
+
+# def construct_characterizing_set(pdfa):
+#     states = list(pdfa.check_reachable_states())
+#     marked = True
+#     dist_strs = [[UNMARKED] * len(states) for i in range(len(states))]
+#     dist_strs_set = {''}
+
+#     # mark states p, q if their output distributions are not the same
+#     # maybe add optional threshold so can accept distributions that are 'almost same'
+#     for p in states:
+#         for q in states:
+#             if pdfa.transition_weights[p] != pdfa.transition_weights[q]:
+#                 dist_strs[states.index(p)][states.index(q)] = '' # distinguishable by empty string
+    
+#     for i in range(len(dist_strs)):
+#         for j in range(len(dist_strs[0])):
+#             if i < j:
+#                 dist_strs[i][j] = UNUSED
+    
+#     # repeat until can no longer mark any pair of states
+#     while marked:
+#         marked = False
+#         for p in states:
+#             for q in states:
+#                 idx_p = states.index(p)
+#                 idx_q = states.index(q)
+
+#                 # for each unmarked pair p, q
+#                 if dist_strs[idx_p][idx_q] == UNMARKED and idx_p != idx_q:
+
+#                     # check if already distinguished by existing distinguishing strings
+#                     dist_string = try_using_existing_dstrings(pdfa, p, q, dist_strs_set, dist_strs, states)
+#                     if dist_string:
+#                         marked = True
+#                         continue
+
+#                     for s in pdfa.alphabet:
+#                         idx_p_s = states.index(pdfa.delta[p][s])
+#                         idx_q_s = states.index(pdfa.delta[q][s])
+#                         dist_str = dist_strs[idx_p_s][idx_q_s] if dist_strs[idx_p_s][idx_q_s] != UNUSED else dist_strs[idx_q_s][idx_p_s]
+#                         if dist_str != UNMARKED:
+#                             dist_strs[idx_p][idx_q] = s + dist_str
+#                             dist_strs_set.add(s + dist_str)
+#                             marked = True
+#                             break
+
+#     res = list(dist_strs_set)
+#     #res = list(itertools.chain.from_iterable(dist_strs))
+#     #res = list(set([val for val in res if (val != UNMARKED and val != UNUSED)]))
+#     res.sort()
+#     res.sort(key=len)
+#     return res

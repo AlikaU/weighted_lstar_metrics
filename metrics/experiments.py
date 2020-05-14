@@ -1,0 +1,47 @@
+log_results = False
+
+def main():
+    log_results = True
+    alpha = 0.2
+    steps = 2
+    plot_6(alpha, steps)
+    
+    # compute_d(uhl1(), toy_pdfa12(), 0.2, 'example10') # expected: ?
+    # compute_d(uhl1(), uhl3(), 0.2, 'example11') # expected: ?
+    # compute_d(toy_pdfa6(), uhl1(), 0.2, 'example12') # expected: ?
+
+    # same, but on the last state, the transition probabilities are changed by 0.01
+    #compare_truedist_vs_bound(uhl1(), uhl1_first_st(), 0.2, 'uhl1_first_st') # expected: something big
+    #compare_truedist_vs_bound(uhl1(), uhl1_last_st(), 0.2, 'uhl1_last_st') # expected: something small
+    #compare_truedist_vs_bound(uhl1(), uhl1_add_st(), 0.2, 'uhl1_add_st') # expected: something small
+    #compare_truedist_vs_bound(uhl1(), uhl1_remove_st(), 0.2, 'uhl1_remove_st') # expected: something small but bigger
+
+
+class Logger():
+    def __init__(self, path):
+        if log_results:
+            self.logfile = open(path,"w+")
+    def log(self, msg):
+        print(msg)
+        if log_results:
+            self.logfile.write(msg)
+
+start_time = time.time()
+resultpath = 'results/metric/' + datetime.now().strftime("%Y-%m-%d_%Hh%Mm%S")
+
+if log_results:
+    try:
+        os.mkdir(resultpath)
+        logfilepath = f'{resultpath}/log.txt'
+        logger = Logger(logfilepath)
+
+    except OSError:
+        print(OSError.errno)
+        print('Could not create results directory!')
+else:
+    logger = Logger('')
+
+#main()
+
+elapsed_time = time.time() - start_time
+logger.log(f'\ntime elapsed: {elapsed_time}')

@@ -1,4 +1,4 @@
-from PDFA import PDFA
+from weighted_lstar.PDFA import PDFA
 
 def assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,initial_state):
 	for s in transition_weights:
