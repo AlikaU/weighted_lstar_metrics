@@ -1,10 +1,14 @@
+import time
+from datetime import datetime
+
+from metrics.metric_on_known_pdfa import plot_6
 log_results = False
 
 def main():
     log_results = True
     alpha = 0.2
-    steps = 2
-    plot_6(alpha, steps)
+    steps = 10
+    plot_6(alpha, steps, resultpath, logger)
     
     # compute_d(uhl1(), toy_pdfa12(), 0.2, 'example10') # expected: ?
     # compute_d(uhl1(), uhl3(), 0.2, 'example11') # expected: ?
@@ -41,7 +45,7 @@ if log_results:
 else:
     logger = Logger('')
 
-#main()
+main()
 
 elapsed_time = time.time() - start_time
 logger.log(f'\ntime elapsed: {elapsed_time}')

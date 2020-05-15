@@ -1,8 +1,8 @@
-import math, time, os, numpy as np, matplotlib.pyplot as plt, matplotlib as mpl
-from datetime import datetime
+import math, os, numpy as np, matplotlib.pyplot as plt, matplotlib as mpl
 from metrics import toy_pdfa
-from metrics.metric import bound_d, rho_pdfas_states
+from metrics.metric import bound_d, rho_pdfas_states, compare_truedist_vs_bound
 from metrics.vasilevski_chow_test_set import get_vasilevskii_test_set
+from metrics.toy_pdfa import toy_pdfa_10statesA, toy_pdfa_10statesB
 
 from weighted_lstar.our_grammars import uhl1, uhl2, uhl3, assert_and_give_pdfa
 
@@ -17,7 +17,7 @@ change_types = {
 # both objects are structured like so:
 # y axis: bounds, actual_vals
 # x axis: assumed to be i in range (steps)
-def plot_results(result, steps):
+def plot_results(result, steps, resultpath):
     colors = {'tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan'}
     mpl.style.use('seaborn')
     print(result)
@@ -51,27 +51,33 @@ def plot_results(result, steps):
     plt.close()
 
 
-def plot_6(alpha, steps):
-    Ms = [toy_pdfa_10statesA(), toy_pdfa_10statesB(), uhl1(), uhl2(), uhl3()]
+def plot_6(alpha, steps, resultpath, logger):
+    #Ms = [toy_pdfa_10statesA(), toy_pdfa_10statesB(), uhl1(), uhl2(), uhl3()]
+    Ms = [toy_pdfa_10statesA()]
     results = []
     for change_type in change_types:
-        results.append(d_as_difference_increases(Ms, change_type, steps, alpha))
+        results.append(d_as_difference_increases(Ms, change_type, steps, alpha, resultpath, logger))
 
         M = Ms[0] # TODO decide which
-        results.append(delta_as_difference_increases(M, change_type, steps, alpha))
+        results.append(delta_as_difference_increases(M, change_type, steps, alpha, resultpath))
     
     for result in results:
-        plot_results(result, steps)
+        plot_results(result, steps, resultpath)
 
 
 # d between M and different variations of it
-def d_as_difference_increases(Ms, changetype, steps, alpha):
+def d_as_difference_increases(Ms, changetype, steps, alpha, resultpath, logger):
     results = []
     for M in Ms:
         bounds, actual_vals = [], []
+        if resultpath:
+            M.draw_nicely(keep=True,filename=f'{resultpath}/{M.informal_name}/original')
         for i in range (steps):
             N = get_modified_aut(M, i, changetype)
-            upper_bound, true_dist, msg = compare_truedist_vs_bound(M, N, alpha, f'{M.informal_name}_{changetype}_{i}', resultpath)
+            if resultpath:
+                N.draw_nicely(keep=True,filename=f'{resultpath}/{M.informal_name}/{changetype}/{i}')
+            #upper_bound, true_dist, msg = compare_truedist_vs_bound(M, N, alpha)
+            upper_bound, true_dist, msg = compare_truedist_vs_bound(N, M, alpha)
             logger.log(msg)
             bounds.append(upper_bound)
             actual_vals.append(true_dist)
@@ -84,7 +90,7 @@ def d_as_difference_increases(Ms, changetype, steps, alpha):
 
 
 # difference in predictions, for different words, for M and different variations of it
-def delta_as_difference_increases(M, changetype, steps, alpha):
+def delta_as_difference_increases(M, changetype, steps, alpha, resultpath):
     ws = ['0', '00', '000'] # TODO decide which
     results = []
     for w in ws:
@@ -93,7 +99,9 @@ def delta_as_difference_increases(M, changetype, steps, alpha):
             N = get_modified_aut(M, i, changetype)
             n = len(N.check_reachable_states())
             test_words = get_vasilevskii_test_set(M, n)
-            upper_bound = bound_d(M, N, '', alpha, test_words, True)
+            # TODO which?
+            upper_bound = bound_d(N, M, '', alpha, test_words, True)
+            #upper_bound = bound_d(M, N, '', alpha, test_words, True)
             bounds.append(get_delta_w_bound(upper_bound, alpha))
             actual_vals.append(get_delta_w_actual(M, N, w, alpha))
         results.append({'label': f'w = {w}, bound', 'type': 'bound', 'data': bounds})
