@@ -10,12 +10,10 @@ from metrics.vasilevski_chow_test_set import get_vasilevskii_test_set
 
 
 
-def compare_truedist_vs_bound(M, N, alpha):
+def compare_truedist_vs_bound(M, N, alpha, n):
     dist, count = compute_d(M, N, alpha)
-    #n = len(N.check_reachable_states())
-    # TODO what should it be?!
-    # look 3 letters ahead
-    n = min(len(M.check_reachable_states()) + 3, len(N.check_reachable_states()))
+    if M.num_reachable_states == 2:
+        print('hi')
     test_words = get_vasilevskii_test_set(M, n)
     upper_bound = bound_d(M, N, '', alpha, test_words, True)
     msg = f'M: {M.informal_name}, N: {N.informal_name}\nestimated distance (upper bound): {upper_bound}\nactual distance: {dist}, found after {count} iterations'

@@ -54,7 +54,7 @@ def test_chg_dist_one():
 def test_get_modified_aut(M, expected_ds, change_type, round_amount=4):
     for change_amount in range (len(expected_ds)):
         N = get_modified_aut(M, change_amount, change_type)
-        d = round(compute_d(M, N, 0.2, 'unit_test')[0], round_amount)
+        d = round(compute_d(M, N, 0.2)[0], round_amount)
         print(f'change type: {change_type}, modification amount: {change_amount}, d: {d}')
         assert d == expected_ds[change_amount]
 
@@ -67,16 +67,16 @@ def test_rho_pdfas_states():
     assert round(rho_pdfas_states(toy_pdfa13(), toy_pdfa14(), 0, 0),1) == 0.3
 
 def test_compute_d():
-    assert compute_d(toy_pdfa6(), toy_pdfa6(), 0.2, 'example0')[0] == 0 
-    assert compute_d(toy_pdfa6(), toy_pdfa7(), 0.2, 'example3')[0] == 0.4444444444444445
-    assert compute_d(toy_pdfa6(), toy_pdfa8(), 0.2, 'example4')[0] == 0.5555555555555556
-    assert round(compute_d(toy_pdfa9(), toy_pdfa10(), 0.2, 'example5')[0],5) == 0.4
-    assert compute_d(toy_pdfa6(), toy_pdfa11(), 0.2, 'example8')[0] == 0.3555555555555556
-    assert compute_d(toy_pdfa6(), toy_pdfa12(), 0.2, 'example9')[0] == 0.26229508196721313
+    assert compute_d(toy_pdfa6(), toy_pdfa6(), 0.2)[0] == 0 
+    assert compute_d(toy_pdfa6(), toy_pdfa7(), 0.2)[0] == 0.4444444444444445
+    assert compute_d(toy_pdfa6(), toy_pdfa8(), 0.2)[0] == 0.5555555555555556
+    assert round(compute_d(toy_pdfa9(), toy_pdfa10(), 0.2)[0],5) == 0.4
+    assert compute_d(toy_pdfa6(), toy_pdfa11(), 0.2)[0] == 0.3555555555555556
+    assert compute_d(toy_pdfa6(), toy_pdfa12(), 0.2)[0] == 0.26229508196721313
 
 
 def test_compare_truedist_vs_bound():
-    bound, truedist, msg = compare_truedist_vs_bound(toy_pdfa3(), toy_pdfa5(), 0.2, 'example1')
+    bound, truedist, msg = compare_truedist_vs_bound(toy_pdfa3(), toy_pdfa5(), 0.2)
     assert round(bound, 5) == 0.656
     assert round(truedist, 5) == 0.4
 

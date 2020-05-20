@@ -21,15 +21,15 @@ def plot_results(result, steps, resultpath):
     colors = {'tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan'}
     mpl.style.use('seaborn')
     print(result)
-    x = list(range(steps))
-    # line_labels = ['NB', 'LR']
+    #x = list(range(steps))
     for i, res in enumerate(result['results']):
         y = res['data']
         lbl = res['label']
         line_style = '--' if res['type']=='bound' else '-' 
         clr = f'C{math.floor(i/2.0)}'
 
-        plt.plot(x, y, line_style, color=clr, label=lbl)
+        #plt.plot(x, y, line_style, color=clr, label=lbl)
+        plt.plot(y, line_style, color=clr, label=lbl)
  
     
     #plt.grid(b=True, which='major', color='#666666', linestyle='-', alpha=0.4)
@@ -37,8 +37,6 @@ def plot_results(result, steps, resultpath):
     #plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
     #     plt.ylim(0.5, 1)
 
-    #     plt.ylabel(f'test accuracy')
-    #     if (i == 1): plt.xlabel('percentage of train set used')
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=3, fancybox=True, shadow=True)
     plt.xlabel(result['xlabel'])
     plt.ylabel(result['ylabel'])
@@ -50,64 +48,67 @@ def plot_results(result, steps, resultpath):
     plt.savefig(results_filename)
     plt.close()
 
-
-def plot_6(alpha, steps, resultpath, logger):
-    #Ms = [toy_pdfa_10statesA(), toy_pdfa_10statesB(), uhl1(), uhl2(), uhl3()]
-    Ms = [toy_pdfa_10statesA()]
+# TODO maybe play with test_depth
+# test_depth: when computing the bound, how far do we look beyond the reachable states of the smaller PDFA
+# (we will treat the smaller PDFA as the known automaton and the larger one as the blackbox)
+def plot_6(alpha, steps, resultpath, logger, test_depth=3):
+    #PDFAs = [toy_pdfa_10statesA(), toy_pdfa_10statesB(), uhl1(), uhl2(), uhl3()]
+    PDFAs = [toy_pdfa_10statesA()]
+    #PDFAs = [uhl3()]
     results = []
     for change_type in change_types:
-        results.append(d_as_difference_increases(Ms, change_type, steps, alpha, resultpath, logger))
+        results.append(d_as_difference_increases(PDFAs, change_type, steps, alpha, resultpath, logger, test_depth))
 
-        M = Ms[0] # TODO decide which
-        results.append(delta_as_difference_increases(M, change_type, steps, alpha, resultpath))
+        pdfa = PDFAs[0] # TODO decide which
+        results.append(delta_as_difference_increases(pdfa, change_type, steps, alpha, resultpath, test_depth))
     
     for result in results:
         plot_results(result, steps, resultpath)
 
 
-# d between M and different variations of it
-def d_as_difference_increases(Ms, changetype, steps, alpha, resultpath, logger):
+
+# d between original PDFAs and different variations of them
+
+def d_as_difference_increases(PDFAs, changetype, steps, alpha, resultpath, logger, test_depth):
     results = []
-    for M in Ms:
+    for original in PDFAs:
         bounds, actual_vals = [], []
         if resultpath:
-            M.draw_nicely(keep=True,filename=f'{resultpath}/{M.informal_name}/original')
-        for i in range (steps):
-            N = get_modified_aut(M, i, changetype)
+            original.draw_nicely(keep=True,filename=f'{resultpath}/{original.informal_name}/original_pdfa')
+        for i in range (min(steps, original.num_reachable_states)):
+            modified = get_modified_aut(original, i, changetype)
             if resultpath:
-                N.draw_nicely(keep=True,filename=f'{resultpath}/{M.informal_name}/{changetype}/{i}')
-            #upper_bound, true_dist, msg = compare_truedist_vs_bound(M, N, alpha)
-            upper_bound, true_dist, msg = compare_truedist_vs_bound(N, M, alpha)
+                modified.draw_nicely(keep=True,filename=f'{resultpath}/{original.informal_name}/modified_{changetype}/{i}')
+            n = len(modified.check_reachable_states()) + test_depth
+            upper_bound, true_dist, msg = compare_truedist_vs_bound(modified, original, alpha, n)
             logger.log(msg)
             bounds.append(upper_bound)
             actual_vals.append(true_dist)
         logger.log(f'Results as we modify the {changetype}:\nUpper bounds: {bounds} \nTrue distances: {actual_vals}')
-        results.append({'label': f'M = {M.informal_name}, bound', 'type': 'bound', 'data': bounds})
-        results.append({'label': f'M = {M.informal_name}, actual', 'type': 'actual', 'data': actual_vals})
-    gname = f'Graph of distances between M and its modified versions. Each incremental modification of M reduces the {changetype}'
+        results.append({'label': f'original = {original.informal_name}, bound', 'type': 'bound', 'data': bounds})
+        results.append({'label': f'original = {original.informal_name}, actual', 'type': 'actual', 'data': actual_vals})
+    gname = f'Graph of distances between the original PDFA and its modified versions. Each incremental modification reduces the {changetype}'
     sname = f'd_{changetype}'
     return {'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'd'}
 
 
 # difference in predictions, for different words, for M and different variations of it
-def delta_as_difference_increases(M, changetype, steps, alpha, resultpath):
+def delta_as_difference_increases(original, changetype, steps, alpha, resultpath, test_depth):
     ws = ['0', '00', '000'] # TODO decide which
     results = []
     for w in ws:
         bounds, actual_vals = [], []
-        for i in range (steps):
-            N = get_modified_aut(M, i, changetype)
-            n = len(N.check_reachable_states())
-            test_words = get_vasilevskii_test_set(M, n)
-            # TODO which?
-            upper_bound = bound_d(N, M, '', alpha, test_words, True)
-            #upper_bound = bound_d(M, N, '', alpha, test_words, True)
+        for i in range (min(steps, original.num_reachable_states)):
+            modified = get_modified_aut(original, i, changetype)
+            n = len(modified.check_reachable_states()) + test_depth
+            test_words = get_vasilevskii_test_set(modified, n)
+            upper_bound = bound_d(modified, original, '', alpha, test_words, True)
             bounds.append(get_delta_w_bound(upper_bound, alpha))
-            actual_vals.append(get_delta_w_actual(M, N, w, alpha))
+            actual_vals.append(get_delta_w_actual(original, modified, w, alpha))
         results.append({'label': f'w = {w}, bound', 'type': 'bound', 'data': bounds})
         results.append({'label': f'w = {w}, actual', 'type': 'actual', 'data': actual_vals})
-    gname = f'Graph of discrepancy between the outputs of {M.informal_name} and its modified versions as we read different input words. Each incremental modification of M reduces the {change_types[changetype]}'
-    sname = f'delta_{M.informal_name}_{changetype}'
+    gname = f'Graph of discrepancy between the outputs of {original.informal_name} and its modified versions as we read different input words. Each incremental modification of M reduces the {change_types[changetype]}'
+    sname = f'delta_{original.informal_name}_{changetype}'
     return {'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'discr(w)'}
 
 
