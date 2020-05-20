@@ -8,7 +8,7 @@ def main():
     log_results = True
     alpha = 0.2
     steps = 10
-    plot_6(alpha, steps, resultpath, logger, test_depth=6)
+    plot_6(alpha, steps, resultpath, logger, test_depth=2)
     
     # compute_d(uhl1(), toy_pdfa12(), 0.2, 'example10') # expected: ?
     # compute_d(uhl1(), uhl3(), 0.2, 'example11') # expected: ?

@@ -1,7 +1,7 @@
 import math, os, numpy as np, matplotlib.pyplot as plt, matplotlib as mpl
 from metrics import toy_pdfa
 from metrics.metric import bound_d, rho_pdfas_states, compare_truedist_vs_bound
-from metrics.vasilevski_chow_test_set import get_vasilevskii_test_set
+from metrics.vasilevski_chow_test_set import get_vasilevskii_test_set, construct_spanning_tree_words
 from metrics.toy_pdfa import toy_pdfa_10statesA, toy_pdfa_10statesB
 
 from weighted_lstar.our_grammars import uhl1, uhl2, uhl3, assert_and_give_pdfa
@@ -94,7 +94,9 @@ def d_as_difference_increases(PDFAs, changetype, steps, alpha, resultpath, logge
 
 # difference in predictions, for different words, for M and different variations of it
 def delta_as_difference_increases(original, changetype, steps, alpha, resultpath, test_depth):
-    ws = ['0', '00', '000'] # TODO decide which
+    #ws = ['0', '00', '000'] # TODO decide which
+    ws = construct_spanning_tree_words(original)
+    print(f'testing discrepancy between original and modified on the following words: {ws}')
     results = []
     for w in ws:
         bounds, actual_vals = [], []
