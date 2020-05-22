@@ -37,23 +37,23 @@ def test_get_delta_w_actual():
 
 def test_chg_nstates():
     M = toy_pdfa_10statesA()
-    expected_ds = [0, 0.2202, 0.2534, 0.2534, 0.2534, 0.2534, 0.2534, 0.3424, 0.368, 0.368]
+    expected_ds = [0, 0.1193, 0.192, 0.192, 0.192, 0.192, 0.2304, 0.2304, 0.224, 0.288]
     test_get_modified_aut(M, expected_ds, 'chg_nstates')
 
 def test_chg_dist_all():
     M = toy_pdfa_10statesA()
-    expected_ds = [0, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1]
+    expected_ds = [0, 0.09, 0.18, 0.27, 0.36, 0.45, 0.54, 0.63, 0.72, 0.81, 0.8998]
     test_get_modified_aut(M, expected_ds, 'chg_dist_all')
 
 def test_chg_dist_one():
     M = toy_pdfa_10statesA()
-    expected_ds = [0, 0.00217, 0.00434, 0.0065, 0.00867, 0.01084, 0.01301, 0.01518, 0.01734, 0.01951, 0.02168]
+    expected_ds = [0, 0.01951, 0.03902, 0.05854, 0.07805, 0.09756, 0.11707, 0.13659, 0.1561, 0.17561, 0.19508]
     test_get_modified_aut(M, expected_ds, 'chg_dist_one', 5)
 
 
 def test_get_modified_aut(M, expected_ds, change_type, round_amount=4):
     for change_amount in range (len(expected_ds)):
-        N = get_modified_aut(M, change_amount, change_type)
+        N = get_modified_aut(M, change_amount, change_type, 10)
         d = round(compute_d(M, N, 0.2)[0], round_amount)
         print(f'change type: {change_type}, modification amount: {change_amount}, d: {d}')
         assert d == expected_ds[change_amount]
@@ -76,8 +76,9 @@ def test_compute_d():
 
 
 def test_compare_truedist_vs_bound():
-    bound, truedist, msg = compare_truedist_vs_bound(toy_pdfa3(), toy_pdfa5(), 0.2)
-    assert round(bound, 5) == 0.656
+    n = len(toy_pdfa3().check_reachable_states()) + 3
+    bound, truedist, msg = compare_truedist_vs_bound(toy_pdfa3(), toy_pdfa5(), 0.2, n)
+    assert round(bound, 5) == 0.56384
     assert round(truedist, 5) == 0.4
 
 # bound metric

@@ -2,9 +2,8 @@ import math, os, numpy as np, matplotlib.pyplot as plt, matplotlib as mpl
 from metrics import toy_pdfa
 from metrics.metric import bound_d, rho_pdfas_states, compare_truedist_vs_bound
 from metrics.vasilevski_chow_test_set import get_vasilevskii_test_set, construct_spanning_tree_words
-from metrics.toy_pdfa import toy_pdfa_10statesA, toy_pdfa_10statesB
 
-from weighted_lstar.our_grammars import uhl1, uhl2, uhl3, assert_and_give_pdfa
+from weighted_lstar.our_grammars import assert_and_give_pdfa
 
 change_types = {
     'chg_nstates': 'number of states',
@@ -51,10 +50,8 @@ def plot_results(result, steps, resultpath):
 # TODO maybe play with test_depth
 # test_depth: when computing the bound, how far do we look beyond the reachable states of the smaller PDFA
 # (we will treat the smaller PDFA as the known automaton and the larger one as the blackbox)
-def plot_6(alpha, steps, resultpath, logger, test_depth=3):
-    #PDFAs = [toy_pdfa_10statesA(), toy_pdfa_10statesB(), uhl1(), uhl2(), uhl3()]
-    PDFAs = [toy_pdfa_10statesA()]
-    #PDFAs = [uhl3()]
+def plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3):
+
     results = []
     for change_type in change_types:
         results.append(d_as_difference_increases(PDFAs, change_type, steps, alpha, resultpath, logger, test_depth))
@@ -76,7 +73,7 @@ def d_as_difference_increases(PDFAs, changetype, steps, alpha, resultpath, logge
         if resultpath:
             original.draw_nicely(keep=True,filename=f'{resultpath}/{original.informal_name}/original_pdfa')
         for i in range (min(steps, original.num_reachable_states)):
-            modified = get_modified_aut(original, i, changetype)
+            modified = get_modified_aut(original, i, changetype, steps)
             if resultpath:
                 modified.draw_nicely(keep=True,filename=f'{resultpath}/{original.informal_name}/modified_{changetype}/{i}')
             n = len(modified.check_reachable_states()) + test_depth
@@ -101,7 +98,7 @@ def delta_as_difference_increases(original, changetype, steps, alpha, resultpath
     for w in ws:
         bounds, actual_vals = [], []
         for i in range (min(steps, original.num_reachable_states)):
-            modified = get_modified_aut(original, i, changetype)
+            modified = get_modified_aut(original, i, changetype, steps)
             n = len(modified.check_reachable_states()) + test_depth
             test_words = get_vasilevskii_test_set(modified, n)
             upper_bound = bound_d(modified, original, '', alpha, test_words, True)
@@ -114,7 +111,7 @@ def delta_as_difference_increases(original, changetype, steps, alpha, resultpath
     return {'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'discr(w)'}
 
 
-def get_modified_aut(M, i, changetype):
+def get_modified_aut(M, i, changetype, totalsteps):
     M_states = list(M.check_reachable_states())
     n = len(M_states)
     informal_name = f'{M.informal_name}_{i}_{changetype}'
@@ -140,17 +137,36 @@ def get_modified_aut(M, i, changetype):
     else:
         for state in range(n):
             transitions[state] = M.transitions[state]
+            start_val = transition_weights[state][0]
+            for idx in range(i):
+                if changetype == 'chg_dist_all':
+                    chg_distr_state(alphabet, transition_weights, state, totalsteps, start_val)
 
-            if changetype == 'chg_dist_all':
-                transition_weights[state][alphabet[0]] += i * 0.01
-                transition_weights[state][alphabet[-1]] -= i * 0.01
-
-            elif changetype == 'chg_dist_one':
-                if state == n - 1:
-                    transition_weights[state][alphabet[0]] += i * 0.01
-                    transition_weights[state][alphabet[-1]] -= i * 0.01
+                elif changetype == 'chg_dist_one':
+                    if state == n - 1:
+                        chg_distr_state(alphabet, transition_weights, state, totalsteps, start_val)
+                        # transition_weights[state][alphabet[0]] += i * 0.01
+                        # transition_weights[state][alphabet[-1]] -= i * 0.01
 
     return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
+
+# TODO test on all automata
+# how to cycle through states that we are modifying and ensure that with each call to this, we get an increasingly different automaton?
+def chg_distr_state(alphabet, transition_weights, state, totalsteps, start_val):
+    step = (1 - start_val)/totalsteps
+    assert transition_weights[state][0] + step <= 1
+    transition_weights[state][0] += step
+    if transition_weights[state][1] - step >= 0:
+        transition_weights[state][1] -= step
+    elif transition_weights[state][2] - step >= 0:
+        transition_weights[state][2] -= step
+    else: # probs for 1 and 2 must sum up to 0.09
+        assert round(transition_weights[state][1] + transition_weights[state][2], 5) == step
+        # make them almost 0 and make sure they add up to 1. this is to avoid completely making probabilities 0 which 'erases' the state
+        # by making it unreachable
+        transition_weights[state][2] = 0.0001
+        transition_weights[state][1] = 0.0001 
+        transition_weights[state][0] = 0.9998
 
 
 def remove_one_state(transitions, nstates, alphabet):

@@ -2,13 +2,18 @@ import time
 from datetime import datetime
 
 from metrics.metric_on_known_pdfa import plot_6
+from metrics.toy_pdfa import toy_pdfa_10statesA, toy_pdfa_10statesB
+from weighted_lstar.our_grammars import uhl1, uhl2, uhl3
 log_results = False
 
 def main():
     log_results = True
     alpha = 0.2
     steps = 10
-    plot_6(alpha, steps, resultpath, logger, test_depth=2)
+    #PDFAs = [toy_pdfa_10statesA(), toy_pdfa_10statesB(), uhl1(), uhl2(), uhl3()]
+    PDFAs = [toy_pdfa_10statesB()]
+    #PDFAs = [uhl3()]
+    plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3)
     
     # compute_d(uhl1(), toy_pdfa12(), 0.2, 'example10') # expected: ?
     # compute_d(uhl1(), uhl3(), 0.2, 'example11') # expected: ?
