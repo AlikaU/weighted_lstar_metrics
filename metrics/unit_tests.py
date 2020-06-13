@@ -38,22 +38,23 @@ def test_get_delta_w_actual():
 def test_chg_nstates():
     M = toy_pdfa_10statesA()
     expected_ds = [0, 0.1193, 0.192, 0.192, 0.192, 0.192, 0.2304, 0.2304, 0.224, 0.288]
-    test_get_modified_aut(M, expected_ds, 'chg_nstates')
+    test_get_modified_aut(M, expected_ds, 'chg_nstates', 4)
 
 def test_chg_dist_all():
     M = toy_pdfa_10statesA()
-    expected_ds = [0, 0.09, 0.18, 0.27, 0.36, 0.45, 0.54, 0.63, 0.72, 0.81, 0.8998]
+    expected_ds = [0, 0.09, 0.18, 0.27, 0.36, 0.45, 0.54, 0.63, 0.719, 0.809, 0.898]
     test_get_modified_aut(M, expected_ds, 'chg_dist_all')
 
 def test_chg_dist_one():
     M = toy_pdfa_10statesA()
-    expected_ds = [0, 0.01951, 0.03902, 0.05854, 0.07805, 0.09756, 0.11707, 0.13659, 0.1561, 0.17561, 0.19508]
-    test_get_modified_aut(M, expected_ds, 'chg_dist_one', 5)
+    expected_ds = [0, 0.02, 0.039, 0.059, 0.078, 0.097, 0.117, 0.136, 0.156, 0.175, 0.195]
+    test_get_modified_aut(M, expected_ds, 'chg_dist_one')
 
 
-def test_get_modified_aut(M, expected_ds, change_type, round_amount=4):
+def test_get_modified_aut(M, expected_ds, change_type, round_amount=3):
     for change_amount in range (len(expected_ds)):
-        N = get_modified_aut(M, change_amount, change_type, 10)
+        steps = 10 if change_type == 'chg_nstates' else 11
+        N = get_modified_aut(M, change_amount, change_type, steps)
         d = round(compute_d(M, N, 0.2)[0], round_amount)
         print(f'change type: {change_type}, modification amount: {change_amount}, d: {d}')
         assert d == expected_ds[change_amount]

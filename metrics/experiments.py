@@ -10,9 +10,10 @@ def main():
     log_results = True
     alpha = 0.2
     steps = 10
-    #PDFAs = [toy_pdfa_10statesA(), toy_pdfa_10statesB(), uhl1(), uhl2(), uhl3()]
-    PDFAs = [toy_pdfa_10statesB()]
-    #PDFAs = [uhl3()]
+    PDFAs = [toy_pdfa_10statesA(), toy_pdfa_10statesB(), uhl1(), uhl2(), uhl3()]
+    #PDFAs = [uhl1(), uhl2(), uhl3()]
+    #PDFAs = [toy_pdfa_10statesA(), toy_pdfa_10statesB()]
+    #PDFAs = [uhl2()]
     plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3)
     
     # compute_d(uhl1(), toy_pdfa12(), 0.2, 'example10') # expected: ?

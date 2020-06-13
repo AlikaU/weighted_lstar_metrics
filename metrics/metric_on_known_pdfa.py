@@ -69,11 +69,12 @@ def plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3):
 def d_as_difference_increases(PDFAs, changetype, steps, alpha, resultpath, logger, test_depth):
     results = []
     for original in PDFAs:
+        step_s = min(steps + 1, original.num_reachable_states) if changetype == 'chg_nstates' else steps + 1
         bounds, actual_vals = [], []
         if resultpath:
             original.draw_nicely(keep=True,filename=f'{resultpath}/{original.informal_name}/original_pdfa')
-        for i in range (min(steps, original.num_reachable_states)):
-            modified = get_modified_aut(original, i, changetype, steps)
+        for i in range (step_s):
+            modified = get_modified_aut(original, i, changetype, step_s)
             if resultpath:
                 modified.draw_nicely(keep=True,filename=f'{resultpath}/{original.informal_name}/modified_{changetype}/{i}')
             n = len(modified.check_reachable_states()) + test_depth
@@ -93,11 +94,12 @@ def d_as_difference_increases(PDFAs, changetype, steps, alpha, resultpath, logge
 def delta_as_difference_increases(original, changetype, steps, alpha, resultpath, test_depth):
     #ws = ['0', '00', '000'] # TODO decide which
     ws = construct_spanning_tree_words(original)
+    steps = min(steps + 1, original.num_reachable_states) if changetype == 'chg_nstates' else steps + 1
     print(f'testing discrepancy between original and modified on the following words: {ws}')
     results = []
     for w in ws:
         bounds, actual_vals = [], []
-        for i in range (min(steps, original.num_reachable_states)):
+        for i in range (steps):
             modified = get_modified_aut(original, i, changetype, steps)
             n = len(modified.check_reachable_states()) + test_depth
             test_words = get_vasilevskii_test_set(modified, n)
@@ -111,17 +113,17 @@ def delta_as_difference_increases(original, changetype, steps, alpha, resultpath
     return {'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'discr(w)'}
 
 
-def get_modified_aut(M, i, changetype, totalsteps):
+def get_modified_aut(M, modif_amount, changetype, totalsteps):
     M_states = list(M.check_reachable_states())
-    n = len(M_states)
-    informal_name = f'{M.informal_name}_{i}_{changetype}'
+    n_states = len(M_states)
+    informal_name = f'{M.informal_name}_{modif_amount}_{changetype}'
     transitions = {}
     transition_weights = {}
     alphabet = list(M.internal_alphabet)
     alphabet.remove('EOS')
     alphabet = tuple(alphabet)
 
-    for j in range(n):
+    for j in range(n_states):
         transition_weights[j] = {}
         transitions[j] = {}
         for symbol in alphabet:        
@@ -129,44 +131,65 @@ def get_modified_aut(M, i, changetype, totalsteps):
             transitions[j][symbol] = M.transitions[j][symbol]
 
     if changetype == 'chg_nstates':
-        nstates = n
-        for idx in range(i):
-            transitions = remove_one_state(transitions, nstates, alphabet)
-            nstates -= 1
+        n_states_new = n_states
+        for idx in range(modif_amount):
+            transitions = remove_one_state(transitions, n_states_new, alphabet)
+            n_states_new -= 1
           
     else:
-        for state in range(n):
+        for state in range(n_states):
             transitions[state] = M.transitions[state]
             start_val = transition_weights[state][0]
-            for idx in range(i):
+            for idx in range(modif_amount):
                 if changetype == 'chg_dist_all':
                     chg_distr_state(alphabet, transition_weights, state, totalsteps, start_val)
 
                 elif changetype == 'chg_dist_one':
-                    if state == n - 1:
+                    if state == n_states - 1:
                         chg_distr_state(alphabet, transition_weights, state, totalsteps, start_val)
-                        # transition_weights[state][alphabet[0]] += i * 0.01
-                        # transition_weights[state][alphabet[-1]] -= i * 0.01
 
     return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
 
-# TODO test on all automata
-# how to cycle through states that we are modifying and ensure that with each call to this, we get an increasingly different automaton?
+# make one incremental step, towards making the distribution have Pr(0) ~= 1
+# knowing that we started from start_val and that this function will be called totalsteps times
 def chg_distr_state(alphabet, transition_weights, state, totalsteps, start_val):
-    step = (1 - start_val)/totalsteps
-    assert transition_weights[state][0] + step <= 1
+
+    max_sum = sum(transition_weights[state].values()) # probabilities may sum to less than 1 (cause Pr($)=0.1 and it isn't here)
+    step = (max_sum - start_val)/(totalsteps - 1) # by how much we increase Pr(0) at each step
+
+    # 1. increase Pr(0)
+    # if Pr(0) exceeds 1, there's something really wrong
+    assert round(transition_weights[state][0] + step, 7) <= max_sum or math.isclose(transition_weights[state][0] + step, max_sum, rel_tol = 1e-05)
     transition_weights[state][0] += step
-    if transition_weights[state][1] - step >= 0:
-        transition_weights[state][1] -= step
-    elif transition_weights[state][2] - step >= 0:
-        transition_weights[state][2] -= step
-    else: # probs for 1 and 2 must sum up to 0.09
-        assert round(transition_weights[state][1] + transition_weights[state][2], 5) == step
-        # make them almost 0 and make sure they add up to 1. this is to avoid completely making probabilities 0 which 'erases' the state
-        # by making it unreachable
-        transition_weights[state][2] = 0.0001
-        transition_weights[state][1] = 0.0001 
-        transition_weights[state][0] = 0.9998
+
+    # 2. now we need to remove the same amount from Pr(symbols other than 0)
+    mass_to_remove = step 
+    sum_of_other_probs = sum(value for key, value in transition_weights[state].items() if key != 0)
+    assert sum_of_other_probs > mass_to_remove or math.isclose(sum_of_other_probs, mass_to_remove, abs_tol = 1e-04)
+    for i in range(1, len(transition_weights[state])):
+        if transition_weights[state][i] - mass_to_remove >= 0 or math.isclose(transition_weights[state][i] - mass_to_remove, 0, abs_tol = 1e-04):
+            transition_weights[state][i] -= mass_to_remove
+            break
+        elif transition_weights[state][i] > 0.001:
+            mass_to_remove -= transition_weights[state][i]
+            transition_weights[state][i] = 0
+
+    # 3. if a weight is 0, make make it almost 0 instead. making probabilities 0
+    # 'erases' some states, making them unreachable, which we don't want to deal with right now
+    for i in range(len(transition_weights[state])):
+        if transition_weights[state][i] < 0.001:
+            fix = 0.001 - transition_weights[state][i]
+            transition_weights[state][i] = 0.001
+            transition_weights[state][0] -= fix
+
+        # there might be a cleaner way, just needed to make it add up to <=1, and this works for now
+        transition_weights[state][i] = round_down(transition_weights[state][i], 7)
+
+    assert sum(transition_weights[state].values()) <= 1
+
+def round_down(x, precision):
+    decimal_pt_shift = 10 ** precision
+    return math.floor(x * decimal_pt_shift) / decimal_pt_shift
 
 
 def remove_one_state(transitions, nstates, alphabet):
