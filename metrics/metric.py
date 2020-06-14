@@ -69,11 +69,11 @@ def rho_rnn(M, N, w):
     Mw = M.transition_weights[M.state_after_word(w)]
     Nw = N.state_probs_dist(N.state_from_sequence(w))
     biggest = 0
-    for a in M.input_alphabet:
+    for a in M.internal_alphabet:
         biggest = max(biggest, abs(Mw[a] - Nw[a]))
-    M_eos = Mw['<EOS>']
-    N_eos = Nw[len(M.input_alphabet)]
-    biggest = max(biggest, abs(M_eos - N_eos))
+    # M_eos = Mw['<EOS>']
+    # N_eos = Nw[len(M.input_alphabet)]
+    # biggest = max(biggest, abs(M_eos - N_eos))
     return biggest
 
 
@@ -84,7 +84,7 @@ def rho_pdfas(M, N, w):
     Mw = M.transition_weights[qM]
     Nw = N.transition_weights[qN]
     biggest = 0
-    for a in M.input_alphabet:
+    for a in M.internal_alphabet:
         biggest = max(biggest, abs(Mw[a] - Nw[a]))
     return biggest
 
@@ -93,7 +93,7 @@ def rho_pdfas_states(M, N, qM, qN):
     Mw = M.transition_weights[qM]
     Nw = N.transition_weights[qN]
     biggest = 0
-    for a in M.input_alphabet:
+    for a in M.internal_alphabet:
         biggest = max(biggest, abs(Mw[a] - Nw[a]))
     return biggest
 
@@ -169,3 +169,11 @@ def plot_results(results, grammar, filename):
     plt.xlabel('n')
     plt.savefig(filename)
     plt.close()
+
+def str_to_ints(w):
+    # res = []
+    # for char in w:
+    #     res.append(M.char2int[char])
+    # return res
+    return tuple(map(int, list(w)))
+

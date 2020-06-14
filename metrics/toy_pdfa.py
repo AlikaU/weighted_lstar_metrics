@@ -1,6 +1,90 @@
 from weighted_lstar.PDFA import PDFA
 from weighted_lstar.our_grammars import assert_and_give_pdfa
 
+
+def M_for_bf_test():
+    informal_name = "M_for_bf_test"
+    transitions = {}
+    transition_weights = {}
+    
+    alphabet = [0,1,2]
+    a, b, c = alphabet
+    transitions[0] = {a: 1, b: 2, c: 3}
+    transitions[1] = {a: 1, b: 1, c: 1}
+    transitions[2] = {a: 2, b: 2, c: 4}
+    transitions[3] = {a: 5, b: 3, c: 0}
+    transitions[4] = {a: 3, b: 5, c: 3}
+    transitions[5] = {a: 5, b: 5, c: 5}
+    for i in range(5):
+        transition_weights[i]={a:0.65,b:0.15, c:0.1}
+    transition_weights[5]={a:0.898, b:0.001, c:0.001}
+    return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
+
+
+class toy_blackbox():
+    def __init__(self, outputs, default):
+        self.out = outputs
+        self.deflt = default
+    
+    def state_from_sequence(self, word):
+        return word
+    
+    def state_probs_dist(self, word):
+        if word in self.out:
+            return self.out[word]
+        else: return self.deflt
+
+def N_for_bf_test_rnn():
+    return toy_blackbox({'bcaa': {a:0.001, b:0.898, c:0.001}}, {a:0.898, b:0.001, c:0.001})
+
+def N_for_bf_test():
+    informal_name = "N_for_bf_test"
+    transitions = {}
+    transition_weights = {}
+    
+    alphabet = [0,1,2]
+    a, b, c = alphabet
+    transitions[0] = {a: 1, b: 2, c: 3}
+    transitions[1] = {a: 1, b: 1, c: 1}
+    transitions[2] = {a: 2, b: 2, c: 4}
+    transitions[3] = {a: 5, b: 3, c: 0}
+    transitions[4] = {a: 6, b: 5, c: 3}
+    transitions[5] = {a: 5, b: 5, c: 5}
+    transitions[6] = {a: 7, b: 6, c: 6}
+    transitions[7] = {a: 8, b: 8, c: 8}
+    transitions[8] = {a: 8, b: 8, c: 8}
+    for i in range(9):
+        transition_weights[i]={a:0.65,b:0.15, c:0.1}
+    transition_weights[7]={a:0.001, b:0.898, c:0.001}
+    return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
+
+def N_for_bf_test2():
+    informal_name = "N_for_bf_test2"
+    transitions = {}
+    transition_weights = {}
+    
+    alphabet = [0,1,2]
+    a, b, c = alphabet
+    transitions[0] = {a: 1, b: 2, c: 3}
+    transitions[1] = {a: 1, b: 1, c: 1}
+    transitions[2] = {a: 2, b: 2, c: 4}
+    transitions[3] = {a: 5, b: 3, c: 0}
+    transitions[4] = {a: 6, b: 5, c: 3}
+    transitions[5] = {a: 5, b: 5, c: 5}
+    transitions[6] = {a: 7, b: 6, c: 6}
+    transitions[7] = {a: 8, b: 8, c: 8}
+    transitions[8] = {a: 8, b: 8, c: 8}
+    for i in range(9):
+        transition_weights[i]={a:0.45,b:0.35, c:0.1}
+        #transition_weights[i]={a:0.05,b:0.75, c:0.1}
+    # transition_weights[0]={a:0.65,b:0.15, c:0.1}
+    # transition_weights[1]={a:0.65,b:0.15, c:0.1}
+    # transition_weights[2]={a:0.65,b:0.15, c:0.1}
+    # transition_weights[3]={a:0.65,b:0.15, c:0.1}
+    transition_weights[7]={a:0.001, b:0.898, c:0.001}
+    return assert_and_give_pdfa(informal_name,transitions,transition_weights,alphabet,0)
+
+
 # small PDFA for tests
 def toy_pdfa1(): # just a small pdfa to test that the spanning tree is done correctly
     informal_name = "toy_pdfa1"

@@ -1,6 +1,6 @@
 import math, os, numpy as np, matplotlib.pyplot as plt, matplotlib as mpl
 from metrics import toy_pdfa
-from metrics.metric import bound_d, rho_pdfas_states, compare_truedist_vs_bound
+from metrics.metric import bound_d, rho_pdfas_states, compare_truedist_vs_bound, str_to_ints
 from metrics.vasilevski_chow_test_set import get_vasilevskii_test_set, construct_spanning_tree_words
 
 from weighted_lstar.our_grammars import assert_and_give_pdfa
@@ -209,18 +209,12 @@ def get_delta_w_bound(upper_bound, alpha):
     return upper_bound/alpha
 
 
-def str_to_ints(M, w):
-    # res = []
-    # for char in w:
-    #     res.append(M.char2int[char])
-    # return res
-    return tuple(map(int, list(w)))
 
 
 # discounted sum of discrepancies between M and N as we read w
 def get_delta_w_actual(M, N, w, alpha):
     sum = 0
-    w = str_to_ints(M, w)
+    w = str_to_ints(w)
     for i in range(len(w) + 1):
         w_subs = w[0:i]
         #w_ints = tuple(map(int, list(w[0:i])))

@@ -1,9 +1,11 @@
 # import sys
 # sys.path.append('../')
 # print(sys.path)
+import math
 from metrics.metric import compute_d, rho_pdfas, rho_pdfas_states, compare_truedist_vs_bound 
 from metrics.metric_on_known_pdfa import get_modified_aut, get_delta_w_actual
-from metrics.toy_pdfa import toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7, toy_pdfa8, toy_pdfa9, toy_pdfa10, toy_pdfa_10statesA, toy_pdfa11, toy_pdfa12, toy_pdfa13, toy_pdfa14
+from metrics.toy_pdfa import M_for_bf_test, N_for_bf_test, N_for_bf_test2, toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7, toy_pdfa8, toy_pdfa9, toy_pdfa10, toy_pdfa_10statesA, toy_pdfa11, toy_pdfa12, toy_pdfa13, toy_pdfa14
+from metrics.brute_force_test_set import get_d_estimate_all_paths
 resultfolder = 'results/unit_tests/'
 # for each:
 # 1. happy path
@@ -24,6 +26,8 @@ def main():
 
     test_construct_test_words()
     test_get_all_words_of_len()
+
+    test_brute_force_bounda_all_paths()
     # TODO call the rest
 
 
@@ -56,9 +60,21 @@ def test_get_modified_aut(M, expected_ds, change_type, round_amount=3):
         steps = 10 if change_type == 'chg_nstates' else 11
         N = get_modified_aut(M, change_amount, change_type, steps)
         d = round(compute_d(M, N, 0.2)[0], round_amount)
-        print(f'change type: {change_type}, modification amount: {change_amount}, d: {d}')
+        #print(f'change type: {change_type}, modification amount: {change_amount}, d: {d}')
         assert d == expected_ds[change_amount]
 
+def test_brute_force_bounda_all_paths():
+    bound, path, count = get_d_estimate_all_paths(M_for_bf_test(), N_for_bf_test(), 0.2, 0)
+    actual = compute_d(M_for_bf_test(), N_for_bf_test(), 0.2)[0]
+    print(f'brute force bound: {bound}, actual: {actual}')
+    assert math.isclose(bound, 0.64, rel_tol=1e-05)
+    assert path == '0x'
+
+    bound, path, count = get_d_estimate_all_paths(M_for_bf_test(), N_for_bf_test2(), 0.2, 0)
+    actual = compute_d(M_for_bf_test(), N_for_bf_test2(), 0.2)[0]
+    print(f'brute force bound: {bound}, actual: {actual}')
+    assert math.isclose(bound, 0.712, rel_tol=1e-05)
+    assert path == '0x'
     
 
 def test_rho_pdfas_states():
