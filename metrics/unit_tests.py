@@ -2,8 +2,9 @@
 # sys.path.append('../')
 # print(sys.path)
 import math
-from metrics.metric import compute_d, rho_pdfas, rho_pdfas_states, compare_truedist_vs_bound, get_brute_force_d_bound
-from metrics.metric_on_known_pdfa import get_test_set, get_modified_aut, get_delta_w_actual
+from metrics.rhos import rho_infty_norm_pdfas, rho_infty_norm_states, rho_infty_norm
+from metrics.metric import compute_d, compare_truedist_vs_bound, get_brute_force_d_bound
+from metrics.metric_on_known_pdfa import get_test_set, get_performance_bound, get_modified_aut, get_performance_actual
 from metrics.toy_pdfa import M_for_bf_test, N_for_bf_test, N_for_bf_test2, toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7, toy_pdfa8, toy_pdfa9, toy_pdfa10, toy_pdfa_10statesA, toy_pdfa11, toy_pdfa12, toy_pdfa13, toy_pdfa14
 from weighted_lstar.our_grammars import uhl1
 resultfolder = 'results/unit_tests/'
@@ -15,29 +16,30 @@ resultfolder = 'results/unit_tests/'
 
 # compute metric
 def main():
-    # test_rho_pdfas_states()
-    # test_compute_d()
-    # test_bound_d()
-    # test_compare_truedist_vs_bound()
-    # test_chg_nstates()
-    # test_chg_dist_all()
-    # test_chg_dist_one()
-    # test_get_delta_w_actual()
+    test_rho_infty_norm_states()
+    test_compute_d()
+    test_bound_d()
+    test_compare_truedist_vs_bound()
+    test_chg_nstates()
+    test_chg_dist_all()
+    test_chg_dist_one()
+    test_get_performance_actual()
 
-    # test_construct_test_words()
-    # test_get_all_words_of_len()
+    test_construct_test_words()
+    test_get_all_words_of_len()
 
-    # test_brute_force_bound_all_paths()
-    # test_brute_force_bound_bfs()
+    test_brute_force_bound_all_paths()
+    test_brute_force_bound_bfs()
     test_get_test_set()
     # TODO call the rest
 
 
-def test_get_delta_w_actual():
+def test_get_performance_actual():
+    rho = rho_infty_norm
     ws = ['0', '00', '000', '0000']
     expected = [0.4, 0.72, 0.976, 1.1808]
     for i, w in enumerate(ws):
-        res = get_delta_w_actual(toy_pdfa3(), toy_pdfa5(), w, 0.2)
+        res = get_performance_actual(toy_pdfa3(), toy_pdfa5(), w, 0.2, rho)
         #print(f'res: {res}')
         assert expected[i] == round(res, 4)
 
@@ -58,55 +60,59 @@ def test_chg_dist_one():
 
 
 def test_get_modified_aut(M, expected_ds, change_type, round_amount=3):
+    rho = rho_infty_norm
     for change_amount in range (len(expected_ds)):
         steps = 10 if change_type == 'chg_nstates' else 11
         N = get_modified_aut(M, change_amount, change_type, steps)
-        d = round(compute_d(M, N, 0.2)[0], round_amount)
+        d = round(compute_d(M, N, 0.2, rho)[0], round_amount)
         #print(f'change type: {change_type}, modification amount: {change_amount}, d: {d}')
         assert d == expected_ds[change_amount]
 
 def test_brute_force_bound_all_paths():
-    bound, path, count = get_brute_force_d_bound(M_for_bf_test(), N_for_bf_test(), 0.2, search_type='all_paths', max_depth=N_for_bf_test().depth, max_revisits=0)
-    actual = compute_d(M_for_bf_test(), N_for_bf_test(), 0.2)[0]
+    rho = rho_infty_norm
+    bound, path, count = get_brute_force_d_bound(M_for_bf_test(), N_for_bf_test(), 0.2, rho, search_type='all_paths', max_depth=N_for_bf_test().depth, max_revisits=0)
+    actual = compute_d(M_for_bf_test(), N_for_bf_test(), 0.2, rho)[0]
     print(f'brute force all-paths bound: {bound}, actual: {actual}')
     assert math.isclose(bound, 0.64, rel_tol=1e-05)
     assert path == '0x'
 
-    bound, path, count = get_brute_force_d_bound(M_for_bf_test(), N_for_bf_test2(), 0.2, search_type='all_paths', max_depth=N_for_bf_test().depth, max_revisits=0)
-    actual = compute_d(M_for_bf_test(), N_for_bf_test2(), 0.2)[0]
+    bound, path, count = get_brute_force_d_bound(M_for_bf_test(), N_for_bf_test2(), 0.2, rho, search_type='all_paths', max_depth=N_for_bf_test().depth, max_revisits=0)
+    actual = compute_d(M_for_bf_test(), N_for_bf_test2(), 0.2, rho)[0]
     print(f'brute force all-paths bound: {bound}, actual: {actual}')
     assert math.isclose(bound, 0.712, rel_tol=1e-05)
     assert path == '0x'
     
 def test_brute_force_bound_bfs():
-    bound, path, count = get_brute_force_d_bound(M_for_bf_test(), N_for_bf_test(), 0.2, search_type='bfs', max_depth=3, max_revisits=0)
-    actual = compute_d(M_for_bf_test(), N_for_bf_test(), 0.2)[0]
+    rho = rho_infty_norm
+    bound, path, count = get_brute_force_d_bound(M_for_bf_test(), N_for_bf_test(), 0.2, rho, search_type='bfs', max_depth=3, max_revisits=0)
+    actual = compute_d(M_for_bf_test(), N_for_bf_test(), 0.2, rho)[0]
     print(f'brute force bfs bound: {bound}, actual: {actual}')
 
-    bound, path, count = get_brute_force_d_bound(M_for_bf_test(), N_for_bf_test2(), 0.2, search_type='bfs', max_depth=3, max_revisits=0)
-    actual = compute_d(M_for_bf_test(), N_for_bf_test2(), 0.2)[0]
+    bound, path, count = get_brute_force_d_bound(M_for_bf_test(), N_for_bf_test2(), 0.2, rho, search_type='bfs', max_depth=3, max_revisits=0)
+    actual = compute_d(M_for_bf_test(), N_for_bf_test2(), 0.2, rho_infty_norm_states)[0]
     print(f'brute force bfs bound: {bound}, actual: {actual}')
 
-def test_rho_pdfas_states():
-    assert rho_pdfas_states(toy_pdfa3(), toy_pdfa5(), 0, 0) == 0
-    assert rho_pdfas_states(toy_pdfa3(), toy_pdfa5(), 0, 1) == 0.5
-    assert rho_pdfas_states(toy_pdfa6(), toy_pdfa7(), 0, 1) == 1
-    assert round(rho_pdfas_states(toy_pdfa13(), toy_pdfa14(), 0, 0),1) == 0.3
+def test_rho_infty_norm_states():
+    assert rho_infty_norm_states(toy_pdfa3(), toy_pdfa5(), 0, 0) == 0
+    assert rho_infty_norm_states(toy_pdfa3(), toy_pdfa5(), 0, 1) == 0.5
+    assert rho_infty_norm_states(toy_pdfa6(), toy_pdfa7(), 0, 1) == 1
+    assert round(rho_infty_norm_states(toy_pdfa13(), toy_pdfa14(), 0, 0),1) == 0.3
 
 def test_compute_d():
-    assert compute_d(toy_pdfa6(), toy_pdfa6(), 0.2)[0] == 0 
-    assert compute_d(toy_pdfa6(), toy_pdfa7(), 0.2)[0] == 0.4444444444444445
-    assert compute_d(toy_pdfa6(), toy_pdfa8(), 0.2)[0] == 0.5555555555555556
-    assert round(compute_d(toy_pdfa9(), toy_pdfa10(), 0.2)[0],5) == 0.4
-    assert compute_d(toy_pdfa6(), toy_pdfa11(), 0.2)[0] == 0.3555555555555556
-    assert compute_d(toy_pdfa6(), toy_pdfa12(), 0.2)[0] == 0.26229508196721313
+    rho = rho_infty_norm
+    assert compute_d(toy_pdfa6(), toy_pdfa6(), 0.2, rho)[0] == 0 
+    assert compute_d(toy_pdfa6(), toy_pdfa7(), 0.2, rho)[0] == 0.4444444444444445
+    assert compute_d(toy_pdfa6(), toy_pdfa8(), 0.2, rho)[0] == 0.5555555555555556
+    assert round(compute_d(toy_pdfa9(), toy_pdfa10(), 0.2, rho)[0],5) == 0.4
+    assert compute_d(toy_pdfa6(), toy_pdfa11(), 0.2, rho)[0] == 0.3555555555555556
+    assert compute_d(toy_pdfa6(), toy_pdfa12(), 0.2, rho)[0] == 0.26229508196721313
 
 
 def test_compare_truedist_vs_bound():
+    rho = rho_infty_norm
     n = len(toy_pdfa3().check_reachable_states()) + 3
-    bound, truedist, msg = compare_truedist_vs_bound(toy_pdfa3(), toy_pdfa5(), 0.2, n)
+    bound, truedist, msg = compare_truedist_vs_bound(toy_pdfa3(), toy_pdfa5(), 0.2, rho, n)
     # TODO whyy??
-
     # assert round(bound, 5) == 0.56384
     assert round(truedist, 5) == 0.4
 
@@ -138,6 +144,15 @@ def test_get_vasilevskii_test_set():
 
 def test_get_test_set():
     N = uhl1()
-    get_test_set(N, 2000)
+    samples = get_test_set(N, 50, 6)
+    print(samples)
+    samples = get_test_set(N, 50)
+    print(samples)
+
+def test_get_performance_bound():
+    bound = get_performance_bound(0.5, 0.2, discounted=True)
+    assert bound == 2.5
+    bound = get_performance_bound(0.5, 0.2, maxlen=3)
+    assert bound == 4.8828125
 
 main()

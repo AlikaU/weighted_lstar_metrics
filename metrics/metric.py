@@ -2,8 +2,6 @@ import argparse, ast, math, matplotlib.pyplot as plt, numpy as np
 from time import time
 
 from weighted_lstar.our_grammars import assert_and_give_pdfa
-from weighted_lstar.PDFA import PDFA
-
 from metrics.get_M_N import get_M_N, get_M_N_hack
 from metrics.toy_pdfa import toy_pdfa1
 from metrics.vasilevski_chow_test_set import get_vasilevskii_test_set
@@ -11,29 +9,28 @@ from metrics.vasilevski_chow_test_set import get_vasilevskii_test_set
 
 # M: known PDFA
 # N: blackbox
-def compare_truedist_vs_bound(M, N, alpha, n, bound_type='bfs', max_depth=0, max_revisits=-1):
-    dist, count = compute_d(M, N, alpha)
+def compare_truedist_vs_bound(M, N, alpha, rho, n, bound_type='bfs', max_depth=0, max_revisits=-1):
+    dist, count = compute_d(M, N, alpha, rho)
     if M.num_reachable_states == 2:
         print('hi')
     #test_words = get_vasilevskii_test_set(M, n)
     #upper_bound = bound_d(M, N, '', alpha, test_words, True)
-    upper_bound, _, _ = get_brute_force_d_bound(M, N, alpha, bound_type, max_depth, max_revisits)
+    upper_bound, _, _ = get_brute_force_d_bound(M, N, alpha, rho, bound_type, max_depth, max_revisits)
     msg = f'M: {M.informal_name}, N: {N.informal_name}\nestimated distance (upper bound): {upper_bound}\nactual distance: {dist}, found after {count} iterations'
     return upper_bound, dist, msg
 
 
 # M: known PDFA
 # N: blackbox
-def bound_d(M, N, w, alpha, test_words, is_upper_bound):
-    rho = rho_pdfas if isinstance(N, PDFA) else rho_rnn
+def bound_d(M, N, w, alpha, rho, test_words, is_upper_bound):
 
     longest_wordlen = max(k for k in test_words.keys())
     if len(w) >= longest_wordlen: # base case
         x = 1 if is_upper_bound else 0
-        return alpha * rho(M, N, w) + (1 - alpha) * x
+        return alpha * rho(M, N, w=w) + (1 - alpha) * x
     
     else: # recursive case
-        a = alpha * rho(M, N, w)
+        a = alpha * rho(M, N, w=w)
         biggest = 0
         for next_w in test_words[len(w)+1]:
             if not w == next_w[:len(w)]: continue
@@ -43,7 +40,7 @@ def bound_d(M, N, w, alpha, test_words, is_upper_bound):
 
 
 # in: M, N, accuracy thershold maybe
-def compute_d(M, N, alpha):
+def compute_d(M, N, alpha, rho):
     M_states = list(M.check_reachable_states())
     N_states = list(N.check_reachable_states())
     distances = np.zeros((len(M_states), len(N_states)))
@@ -60,46 +57,12 @@ def compute_d(M, N, alpha):
                 max_next_dist = find_max_next_dist(M_state_row, N_state_col, distances, M, N)
                 qM = M_states[M_state_row]
                 qN = N_states[N_state_col]
-                distances[M_state_row][N_state_col] = alpha*rho_pdfas_states(M, N, qM, qN) + (1 - alpha)*max_next_dist
+                distances[M_state_row][N_state_col] = alpha*rho(M, N, qM=qM, qN=qN) + (1 - alpha)*max_next_dist
                 
                 if distances[M_state_row][N_state_col] != old_dist:
                     changed = True
     
     return distances[0][0], count # d(qM0, qN0) distance between initial states of M, N
-
-
-def rho_rnn(M, N, w):
-    w = tuple(map(int, list(w)))
-    Mw = M.transition_weights[M.state_after_word(w)]
-    Nw = N.state_probs_dist(N.state_from_sequence(w))
-    biggest = 0
-    for a in M.internal_alphabet:
-        biggest = max(biggest, abs(Mw[a] - Nw[a]))
-    # M_eos = Mw['<EOS>']
-    # N_eos = Nw[len(M.input_alphabet)]
-    # biggest = max(biggest, abs(M_eos - N_eos))
-    return biggest
-
-
-def rho_pdfas(M, N, w):
-    w_ints = tuple(map(int, list(w)))
-    qM = M.state_after_word(w_ints)
-    qN = N.state_after_word(w_ints)
-    Mw = M.transition_weights[qM]
-    Nw = N.transition_weights[qN]
-    biggest = 0
-    for a in M.internal_alphabet:
-        biggest = max(biggest, abs(Mw[a] - Nw[a]))
-    return biggest
-
-
-def rho_pdfas_states(M, N, qM, qN):
-    Mw = M.transition_weights[qM]
-    Nw = N.transition_weights[qN]
-    biggest = 0
-    for a in M.internal_alphabet:
-        biggest = max(biggest, abs(Mw[a] - Nw[a]))
-    return biggest
 
 
 def find_max_next_dist(qM, qN, distances, M, N):
@@ -186,14 +149,13 @@ def str_to_ints(w):
 # search_type: 'bfs' or 'all_paths', all paths is pretty much useless
 # max_depth: for bfs, we'll search all words of length up to max_depth
 # max_revisits: for all paths search: how many times can a word revisit same state
-def get_brute_force_d_bound(M, N, alpha, search_type, max_depth, max_revisits, verbose=True):
+def get_brute_force_d_bound(M, N, alpha, rho, search_type, max_depth, max_revisits, verbose=True):
     count = 0
-    rho = rho_pdfas if isinstance(N, PDFA) else rho_rnn
     queue = [
             {
                 'state':M._initial_state, 
                 'word':'', 
-                'cost':alpha*rho(M, N, '')
+                'cost':alpha*rho(M, N, w='')
             }
         ]
     costliest_path = None
@@ -224,7 +186,7 @@ def get_brute_force_d_bound(M, N, alpha, search_type, max_depth, max_revisits, v
                     end_path = cur['word'] + 'x'
                     
                 else:
-                    next_cost = cur['cost'] + (1-alpha)**len(next_word) * alpha * rho(M, N, next_word)
+                    next_cost = cur['cost'] + (1-alpha)**len(next_word) * alpha * rho(M, N, w=next_word)
                     queue.append({
                         'state':next_state, 
                         'word':next_word, 

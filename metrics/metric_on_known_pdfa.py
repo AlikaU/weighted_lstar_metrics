@@ -1,6 +1,6 @@
 import math, os, random, numpy as np, matplotlib.pyplot as plt, matplotlib as mpl
 from metrics import toy_pdfa
-from metrics.metric import rho_pdfas_states, compare_truedist_vs_bound, str_to_ints, get_brute_force_d_bound
+from metrics.metric import compare_truedist_vs_bound, str_to_ints, get_brute_force_d_bound
 from metrics.vasilevski_chow_test_set import construct_spanning_tree_words
 
 from weighted_lstar.our_grammars import assert_and_give_pdfa
@@ -50,14 +50,14 @@ def plot_results(result, steps, resultpath):
 # TODO maybe play with test_depth
 # test_depth: when computing the bound, how far do we look beyond the reachable states of the smaller PDFA
 # (we will treat the smaller PDFA as the known automaton and the larger one as the blackbox)
-def plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3, bound_type='bfs', max_depth_add=0, max_revisits=-1):
+def plot_6(PDFAs, alpha, rho, steps, resultpath, logger, test_depth=3, bound_type='bfs', max_depth_add=0, max_revisits=-1):
 
     results = []
     for change_type in change_types:
-        results.append(d_as_difference_increases(PDFAs, change_type, steps, alpha, resultpath, logger, test_depth, bound_type, max_depth_add, max_revisits))
+        results.append(d_as_difference_increases(PDFAs, change_type, steps, alpha, rho, resultpath, logger, test_depth, bound_type, max_depth_add, max_revisits))
 
         pdfa = PDFAs[0] # TODO decide which
-        results.append(delta_as_difference_increases(pdfa, change_type, steps, alpha, resultpath, test_depth, bound_type, max_depth_add, max_revisits))
+        results.append(delta_as_difference_increases(pdfa, change_type, steps, alpha, rho, resultpath, test_depth, bound_type, max_depth_add, max_revisits))
     
     for result in results:
         plot_results(result, steps, resultpath)
@@ -66,7 +66,7 @@ def plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3, bound_type='bf
 
 # d between original PDFAs and different variations of them
 
-def d_as_difference_increases(PDFAs, changetype, steps, alpha, resultpath, logger, test_depth, bound_type, max_depth_add, max_revisits):
+def d_as_difference_increases(PDFAs, changetype, steps, alpha, rho, resultpath, logger, test_depth, bound_type, max_depth_add, max_revisits):
     results = []
     for original in PDFAs:
         step_s = min(steps + 1, original.num_reachable_states) if changetype == 'chg_nstates' else steps + 1
@@ -81,7 +81,7 @@ def d_as_difference_increases(PDFAs, changetype, steps, alpha, resultpath, logge
             max_d = modified.depth + max_depth_add
             if modified.depth > 3 or len(modified.input_alphabet) > 3:
                 max_revisits=0
-            upper_bound, true_dist, msg = compare_truedist_vs_bound(modified, original, alpha, n, bound_type, max_d, max_revisits)
+            upper_bound, true_dist, msg = compare_truedist_vs_bound(modified, original, alpha, rho, n, bound_type, max_d, max_revisits)
             logger.log(msg)
             bounds.append(upper_bound)
             actual_vals.append(true_dist)
@@ -94,7 +94,7 @@ def d_as_difference_increases(PDFAs, changetype, steps, alpha, resultpath, logge
 
 
 # difference in predictions, for different words, for M and different variations of it
-def delta_as_difference_increases(original, changetype, steps, alpha, resultpath, test_depth, bound_type, max_depth_add, max_revisits):
+def delta_as_difference_increases(original, changetype, steps, alpha, rho, resultpath, test_depth, bound_type, max_depth_add, max_revisits):
     #ws = ['0', '00', '000'] # TODO decide which
     ws = construct_spanning_tree_words(original)
     steps = min(steps + 1, original.num_reachable_states) if changetype == 'chg_nstates' else steps + 1
@@ -109,8 +109,8 @@ def delta_as_difference_increases(original, changetype, steps, alpha, resultpath
             #upper_bound = bound_d(modified, original, '', alpha, test_words, True)
             max_d = modified.depth + max_depth_add
             upper_bound, _, _ = get_brute_force_d_bound(modified, original, alpha, bound_type, max_d, max_revisits, verbose=False)
-            bounds.append(get_delta_w_bound(upper_bound, alpha))
-            actual_vals.append(get_delta_w_actual(original, modified, w, alpha))
+            bounds.append(get_performance_bound(upper_bound, alpha))
+            actual_vals.append(get_performance_actual(original, modified, w, alpha, rho))
         results.append({'label': f'w = {w}, bound', 'type': 'bound', 'data': bounds})
         results.append({'label': f'w = {w}, actual', 'type': 'actual', 'data': actual_vals})
     gname = f'Graph of discrepancy between the outputs of {original.informal_name} and its modified versions as we read different input words. Each incremental modification of M reduces the {change_types[changetype]}'
@@ -210,12 +210,17 @@ def remove_one_state(transitions, nstates, alphabet):
     return transitions
 
 
-def get_delta_w_bound(upper_bound, alpha):
-    return upper_bound/alpha
+# discounted: means we're bounding a discounted sum of discrepancies (rhos) as we read the words
+# not discounted: means we're bounding the discrepancy (rho) at the end of reading a word
+def get_performance_bound(upper_bound, alpha, discounted=True, maxlen=-1):
+    if discounted:
+        return upper_bound/alpha
+    else:
+        return upper_bound / (alpha*(1-alpha)**maxlen)
 
 
 # discounted sum of discrepancies between M and N as we read w
-def get_delta_w_actual(M, N, w, alpha):
+def get_performance_actual(M, N, w, alpha, rho):
     sum = 0
     w = str_to_ints(w)
     for i in range(len(w) + 1):
@@ -223,12 +228,12 @@ def get_delta_w_actual(M, N, w, alpha):
         #w_ints = tuple(map(int, list(w[0:i])))
         qM = M.state_after_word(w_subs)
         qN = N.state_after_word(w_subs)
-        sum += rho_pdfas_states(M, N, qM, qN) * (1 - alpha)**i
+        sum += rho(M, N, qM=qM, qN=qN) * (1 - alpha)**i
     return sum
 
 
 # N is the 'blackbox' or the 'bigger automaton' that M is supposed to be an approximation of
-def get_test_set(N, size):
+def get_test_set(N, size, maxlen=-1):
     samples = []
     for i in range(size):
         word = ''
@@ -240,6 +245,8 @@ def get_test_set(N, size):
         symbol = np.random.choice(symbols, p=next_symbol_dist)
 
         while symbol != 'EOS':
+            if maxlen > 0 and len(word) > maxlen-1:
+                break
             word = word+symbol
             # keep drawing from next symbol distrivution
             symbol = np.random.choice(symbols, p=next_symbol_dist)
@@ -248,5 +255,3 @@ def get_test_set(N, size):
     #print(f'samples:{samples}')
     return samples
 
-
-# def bound_kendell_tau_given_d(d):
