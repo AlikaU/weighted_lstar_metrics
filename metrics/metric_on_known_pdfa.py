@@ -1,4 +1,4 @@
-import math, os, numpy as np, matplotlib.pyplot as plt, matplotlib as mpl
+import math, os, random, numpy as np, matplotlib.pyplot as plt, matplotlib as mpl
 from metrics import toy_pdfa
 from metrics.metric import rho_pdfas_states, compare_truedist_vs_bound, str_to_ints, get_brute_force_d_bound
 from metrics.vasilevski_chow_test_set import construct_spanning_tree_words
@@ -214,8 +214,6 @@ def get_delta_w_bound(upper_bound, alpha):
     return upper_bound/alpha
 
 
-
-
 # discounted sum of discrepancies between M and N as we read w
 def get_delta_w_actual(M, N, w, alpha):
     sum = 0
@@ -227,3 +225,28 @@ def get_delta_w_actual(M, N, w, alpha):
         qN = N.state_after_word(w_subs)
         sum += rho_pdfas_states(M, N, qM, qN) * (1 - alpha)**i
     return sum
+
+
+# N is the 'blackbox' or the 'bigger automaton' that M is supposed to be an approximation of
+def get_test_set(N, size):
+    samples = []
+    for i in range(size):
+        word = ''
+        state = N.state_after_word(word)
+        next_symbol_dist = N.state_probs_dist(state)
+
+        # draw from next symbol distribution
+        symbols = N.internal_alphabet
+        symbol = np.random.choice(symbols, p=next_symbol_dist)
+
+        while symbol != 'EOS':
+            word = word+symbol
+            # keep drawing from next symbol distrivution
+            symbol = np.random.choice(symbols, p=next_symbol_dist)
+      
+        samples.append(word)
+    #print(f'samples:{samples}')
+    return samples
+
+
+# def bound_kendell_tau_given_d(d):
