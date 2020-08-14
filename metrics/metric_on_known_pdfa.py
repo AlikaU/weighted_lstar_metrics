@@ -1,7 +1,7 @@
 import math, os, numpy as np, matplotlib.pyplot as plt, matplotlib as mpl
 from metrics import toy_pdfa
-from metrics.metric import bound_d, rho_pdfas_states, compare_truedist_vs_bound, str_to_ints
-from metrics.vasilevski_chow_test_set import get_vasilevskii_test_set, construct_spanning_tree_words
+from metrics.metric import rho_pdfas_states, compare_truedist_vs_bound, str_to_ints, get_brute_force_d_bound
+from metrics.vasilevski_chow_test_set import construct_spanning_tree_words
 
 from weighted_lstar.our_grammars import assert_and_give_pdfa
 
@@ -50,14 +50,14 @@ def plot_results(result, steps, resultpath):
 # TODO maybe play with test_depth
 # test_depth: when computing the bound, how far do we look beyond the reachable states of the smaller PDFA
 # (we will treat the smaller PDFA as the known automaton and the larger one as the blackbox)
-def plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3):
+def plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3, bound_type='bfs', max_depth_add=0, max_revisits=-1):
 
     results = []
     for change_type in change_types:
-        results.append(d_as_difference_increases(PDFAs, change_type, steps, alpha, resultpath, logger, test_depth))
+        results.append(d_as_difference_increases(PDFAs, change_type, steps, alpha, resultpath, logger, test_depth, bound_type, max_depth_add, max_revisits))
 
         pdfa = PDFAs[0] # TODO decide which
-        results.append(delta_as_difference_increases(pdfa, change_type, steps, alpha, resultpath, test_depth))
+        results.append(delta_as_difference_increases(pdfa, change_type, steps, alpha, resultpath, test_depth, bound_type, max_depth_add, max_revisits))
     
     for result in results:
         plot_results(result, steps, resultpath)
@@ -66,7 +66,7 @@ def plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3):
 
 # d between original PDFAs and different variations of them
 
-def d_as_difference_increases(PDFAs, changetype, steps, alpha, resultpath, logger, test_depth):
+def d_as_difference_increases(PDFAs, changetype, steps, alpha, resultpath, logger, test_depth, bound_type, max_depth_add, max_revisits):
     results = []
     for original in PDFAs:
         step_s = min(steps + 1, original.num_reachable_states) if changetype == 'chg_nstates' else steps + 1
@@ -78,7 +78,10 @@ def d_as_difference_increases(PDFAs, changetype, steps, alpha, resultpath, logge
             if resultpath:
                 modified.draw_nicely(keep=True,filename=f'{resultpath}/{original.informal_name}/modified_{changetype}/{i}')
             n = len(modified.check_reachable_states()) + test_depth
-            upper_bound, true_dist, msg = compare_truedist_vs_bound(modified, original, alpha, n)
+            max_d = modified.depth + max_depth_add
+            if modified.depth > 3 or len(modified.input_alphabet) > 3:
+                max_revisits=0
+            upper_bound, true_dist, msg = compare_truedist_vs_bound(modified, original, alpha, n, bound_type, max_d, max_revisits)
             logger.log(msg)
             bounds.append(upper_bound)
             actual_vals.append(true_dist)
@@ -91,7 +94,7 @@ def d_as_difference_increases(PDFAs, changetype, steps, alpha, resultpath, logge
 
 
 # difference in predictions, for different words, for M and different variations of it
-def delta_as_difference_increases(original, changetype, steps, alpha, resultpath, test_depth):
+def delta_as_difference_increases(original, changetype, steps, alpha, resultpath, test_depth, bound_type, max_depth_add, max_revisits):
     #ws = ['0', '00', '000'] # TODO decide which
     ws = construct_spanning_tree_words(original)
     steps = min(steps + 1, original.num_reachable_states) if changetype == 'chg_nstates' else steps + 1
@@ -102,8 +105,10 @@ def delta_as_difference_increases(original, changetype, steps, alpha, resultpath
         for i in range (steps):
             modified = get_modified_aut(original, i, changetype, steps)
             n = len(modified.check_reachable_states()) + test_depth
-            test_words = get_vasilevskii_test_set(modified, n)
-            upper_bound = bound_d(modified, original, '', alpha, test_words, True)
+            #test_words = get_vasilevskii_test_set(modified, n)
+            #upper_bound = bound_d(modified, original, '', alpha, test_words, True)
+            max_d = modified.depth + max_depth_add
+            upper_bound, _, _ = get_brute_force_d_bound(modified, original, alpha, bound_type, max_d, max_revisits, verbose=False)
             bounds.append(get_delta_w_bound(upper_bound, alpha))
             actual_vals.append(get_delta_w_actual(original, modified, w, alpha))
         results.append({'label': f'w = {w}, bound', 'type': 'bound', 'data': bounds})

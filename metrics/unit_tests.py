@@ -2,10 +2,9 @@
 # sys.path.append('../')
 # print(sys.path)
 import math
-from metrics.metric import compute_d, rho_pdfas, rho_pdfas_states, compare_truedist_vs_bound 
+from metrics.metric import compute_d, rho_pdfas, rho_pdfas_states, compare_truedist_vs_bound, get_brute_force_d_bound
 from metrics.metric_on_known_pdfa import get_modified_aut, get_delta_w_actual
 from metrics.toy_pdfa import M_for_bf_test, N_for_bf_test, N_for_bf_test2, toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7, toy_pdfa8, toy_pdfa9, toy_pdfa10, toy_pdfa_10statesA, toy_pdfa11, toy_pdfa12, toy_pdfa13, toy_pdfa14
-from metrics.brute_force_bound import get_d_estimate
 resultfolder = 'results/unit_tests/'
 # for each:
 # 1. happy path
@@ -65,24 +64,24 @@ def test_get_modified_aut(M, expected_ds, change_type, round_amount=3):
         assert d == expected_ds[change_amount]
 
 def test_brute_force_bound_all_paths():
-    bound, path, count = get_d_estimate(M_for_bf_test(), N_for_bf_test(), 0.2, search_type='all_paths', max_revisits=0)
+    bound, path, count = get_brute_force_d_bound(M_for_bf_test(), N_for_bf_test(), 0.2, search_type='all_paths', max_revisits=0)
     actual = compute_d(M_for_bf_test(), N_for_bf_test(), 0.2)[0]
     print(f'brute force all-paths bound: {bound}, actual: {actual}')
     assert math.isclose(bound, 0.64, rel_tol=1e-05)
     assert path == '0x'
 
-    bound, path, count = get_d_estimate(M_for_bf_test(), N_for_bf_test2(), 0.2, search_type='all_paths', max_revisits=0)
+    bound, path, count = get_brute_force_d_bound(M_for_bf_test(), N_for_bf_test2(), 0.2, search_type='all_paths', max_revisits=0)
     actual = compute_d(M_for_bf_test(), N_for_bf_test2(), 0.2)[0]
     print(f'brute force all-paths bound: {bound}, actual: {actual}')
     assert math.isclose(bound, 0.712, rel_tol=1e-05)
     assert path == '0x'
     
 def test_brute_force_bound_bfs():
-    bound, path, count = get_d_estimate(M_for_bf_test(), N_for_bf_test(), 0.2, search_type='bfs', max_depth=3)
+    bound, path, count = get_brute_force_d_bound(M_for_bf_test(), N_for_bf_test(), 0.2, search_type='bfs', max_depth=3)
     actual = compute_d(M_for_bf_test(), N_for_bf_test(), 0.2)[0]
     print(f'brute force bfs bound: {bound}, actual: {actual}')
 
-    bound, path, count = get_d_estimate(M_for_bf_test(), N_for_bf_test2(), 0.2, search_type='bfs', max_depth=3)
+    bound, path, count = get_brute_force_d_bound(M_for_bf_test(), N_for_bf_test2(), 0.2, search_type='bfs', max_depth=3)
     actual = compute_d(M_for_bf_test(), N_for_bf_test2(), 0.2)[0]
     print(f'brute force bfs bound: {bound}, actual: {actual}')
 

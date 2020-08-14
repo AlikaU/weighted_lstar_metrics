@@ -14,7 +14,11 @@ def main():
     #PDFAs = [uhl1(), uhl2(), uhl3()]
     #PDFAs = [toy_pdfa_10statesA(), toy_pdfa_10statesB()]
     #PDFAs = [uhl2()]
-    plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3)
+
+    max_depth_addition = 1 # for all-words search, we search up to words of length = depth(M) + max_depth_addition
+    max_rev = 1             # for all-paths search, we search paths that revisit the same state at most max_rev times
+    #plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3, bound_type='all_path', max_depth_add=max_depth_addition, max_revisits=max_rev)
+    plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3, bound_type='bfs', max_depth_add=max_depth_addition, max_revisits=max_rev)
     
     # compute_d(uhl1(), toy_pdfa12(), 0.2, 'example10') # expected: ?
     # compute_d(uhl1(), uhl3(), 0.2, 'example11') # expected: ?
