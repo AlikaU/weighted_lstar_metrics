@@ -108,7 +108,7 @@ def delta_as_difference_increases(original, changetype, steps, alpha, rho, resul
             #test_words = get_vasilevskii_test_set(modified, n)
             #upper_bound = bound_d(modified, original, '', alpha, test_words, True)
             max_d = modified.depth + max_depth_add
-            upper_bound, _, _ = get_brute_force_d_bound(modified, original, alpha, bound_type, max_d, max_revisits, verbose=False)
+            upper_bound, _, _ = get_brute_force_d_bound(modified, original, alpha, rho, bound_type, max_d, max_revisits, verbose=False)
             bounds.append(get_performance_bound(upper_bound, alpha))
             actual_vals.append(get_performance_actual(original, modified, w, alpha, rho))
         results.append({'label': f'w = {w}, bound', 'type': 'bound', 'data': bounds})

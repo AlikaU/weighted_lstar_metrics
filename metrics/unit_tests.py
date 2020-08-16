@@ -2,7 +2,7 @@
 # sys.path.append('../')
 # print(sys.path)
 import math
-from metrics.rhos import rho_infty_norm_pdfas, rho_infty_norm_states, rho_infty_norm
+from metrics.rhos import rho_infty_norm_pdfas, rho_infty_norm_states, rho_infty_norm, kendall_tau
 from metrics.metric import compute_d, compare_truedist_vs_bound, get_brute_force_d_bound
 from metrics.metric_on_known_pdfa import get_test_set, get_performance_bound, get_modified_aut, get_performance_actual
 from metrics.toy_pdfa import M_for_bf_test, N_for_bf_test, N_for_bf_test2, toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7, toy_pdfa8, toy_pdfa9, toy_pdfa10, toy_pdfa_10statesA, toy_pdfa11, toy_pdfa12, toy_pdfa13, toy_pdfa14
@@ -16,22 +16,39 @@ resultfolder = 'results/unit_tests/'
 
 # compute metric
 def main():
-    test_rho_infty_norm_states()
-    test_compute_d()
-    test_bound_d()
-    test_compare_truedist_vs_bound()
-    test_chg_nstates()
-    test_chg_dist_all()
-    test_chg_dist_one()
-    test_get_performance_actual()
+    # test_rho_infty_norm_states()
+    # test_compute_d()
+    # test_bound_d()
+    # test_compare_truedist_vs_bound()
+    # test_chg_nstates()
+    # test_chg_dist_all()
+    # test_chg_dist_one()
+    # test_get_performance_actual()
 
-    test_construct_test_words()
-    test_get_all_words_of_len()
+    # test_construct_test_words()
+    # test_get_all_words_of_len()
 
-    test_brute_force_bound_all_paths()
-    test_brute_force_bound_bfs()
-    test_get_test_set()
+    # test_brute_force_bound_all_paths()
+    # test_brute_force_bound_bfs()
+
+    # test_get_test_set()
+    test_kendall_tau()
     # TODO call the rest
+
+
+def test_kendall_tau():
+    r_M = ['a', 'b', 'c']
+    alphabet = ['a', 'b', 'c']
+    assert kendall_tau(r_M, r_M, alphabet) == 0
+
+    res = kendall_tau(r_M, ['b', 'a', 'c'], alphabet)
+    assert math.isclose(res, 0.333333, rel_tol=1e-05)
+    res = kendall_tau(r_M, ['b', 'c', 'a'], alphabet)
+    assert math.isclose(res, 0.666666, rel_tol=1e-05)
+    res = kendall_tau(r_M, ['c', 'b', 'a'], alphabet)
+    assert res == 1
+    res = kendall_tau(['a', 'b', 'c', 'd'], ['c', 'b', 'a', 'd'], ['a', 'b', 'c', 'd'])
+    assert res == 0.5
 
 
 def test_get_performance_actual():
