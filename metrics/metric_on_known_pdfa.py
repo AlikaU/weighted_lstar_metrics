@@ -21,11 +21,22 @@ def plot_results(result, steps, resultpath):
     mpl.style.use('seaborn')
     print(result)
     #x = list(range(steps))
+    three_types_of_lines = False
     for i, res in enumerate(result['results']):
         y = res['data']
         lbl = res['label']
-        line_style = '--' if res['type']=='bound' else '-' 
-        clr = f'C{math.floor(i/2.0)}'
+        if res['type'] == 'bound':
+            line_style = '--'
+        elif res['type'] == 'actual':
+            line_style = '-'
+        else:
+            line_style = ':'
+            three_types_of_lines = True
+        
+        if three_types_of_lines:
+            clr = f'C{math.floor(i/3.0)}'
+        else:
+            clr = f'C{math.floor(i/2.0)}'
 
         #plt.plot(x, y, line_style, color=clr, label=lbl)
         plt.plot(y, line_style, color=clr, label=lbl)
@@ -41,11 +52,56 @@ def plot_results(result, steps, resultpath):
     plt.ylabel(result['ylabel'])
     plt.tight_layout()
     #plt.suptitle(result['graph_name'])
-    plt.text(5, 10, result['graph_name'], ha='center', va='bottom', wrap=True)
+    #plt.text(5, 10, result['graph_name'], ha='center', va='bottom', wrap=True)
     sn = result['short_name']
     results_filename = f'{resultpath}/{sn}.png'
     plt.savefig(results_filename)
     plt.close()
+
+
+def plot_using_test_set(PDFAs, alpha, rho, steps, resultpath, logger, test_depth=3, bound_type='bfs', max_depth_add=0, disc=True, max_wordlen=10):
+    to_plot = []
+    for change_type in change_types:
+
+        results = []
+
+        for original in PDFAs:
+            if resultpath:
+                original.draw_nicely(keep=True,filename=f'{resultpath}/{original.informal_name}/original_pdfa')
+
+            # get samples
+            test_set = get_test_set(original, 2000, maxlen=100) # TODO what should maxlen be?
+
+            # for each M, N pair:
+            steps = min(steps + 1, original.num_reachable_states) if change_type == 'chg_nstates' else steps + 1
+            perf_bounds_d_true, perf_bounds_d_bound, perf_actuals = [], [], []
+            for i in range (steps):
+                modified = get_modified_aut(original, i, change_type, steps)
+                if resultpath:
+                    modified.draw_nicely(keep=True,filename=f'{resultpath}/{original.informal_name}/modified_{change_type}/{i}')
+            
+                max_d = modified.depth + max_depth_add
+                dist_bound, dist_true, _ = compare_truedist_vs_bound(modified, original, alpha, rho, 0, max_depth=max_d)
+
+                # save bound and actual for current M, N pair
+                perf_bounds_d_true.append(get_performance_bound(dist_true, alpha, discounted=disc, maxlen=max_wordlen)) # using true d (will be same for all w)
+                perf_bounds_d_bound.append(get_performance_bound(dist_bound, alpha, discounted=disc, maxlen=max_wordlen)) # using bound on d (will be same for all w)
+                if disc:
+                    perf_actuals.append(get_perf_actual_discounted(modified, original, alpha, rho, 2000))
+                else:
+                    perf_actuals.append(get_perf_actual_undiscounted(modified, original, rho, 2000, max_wordlen))
+                
+            results.append({'label': f'bound (true d), {original.informal_name}', 'type': 'bound_true_d', 'data': perf_bounds_d_true})
+            results.append({'label': f'bound (estimate of d), {original.informal_name}', 'type': 'bound', 'data': perf_bounds_d_bound})
+            results.append({'label': f'actual, {original.informal_name}', 'type': 'actual', 'data': perf_actuals})
+        gname = f'Graph of performande of modified versions of {original.informal_name} wrt. the original. Performance is measured using the cumulative discounted discrepancy, averaged across the dataset. Each incremental modification of M reduces the {change_types[change_type]}'
+        disc_str = 'discounted' if disc else 'undiscounted'
+        sname = f'performance_{change_type}_{disc_str}'
+        to_plot.append({'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'performance'})
+    
+    for result in to_plot:
+        plot_results(result, steps, resultpath)
+
 
 # TODO maybe play with test_depth
 # test_depth: when computing the bound, how far do we look beyond the reachable states of the smaller PDFA
@@ -110,7 +166,7 @@ def delta_as_difference_increases(original, changetype, steps, alpha, rho, resul
             max_d = modified.depth + max_depth_add
             upper_bound, _, _ = get_brute_force_d_bound(modified, original, alpha, rho, bound_type, max_d, max_revisits, verbose=False)
             bounds.append(get_performance_bound(upper_bound, alpha))
-            actual_vals.append(get_performance_actual(original, modified, w, alpha, rho))
+            actual_vals.append(get_perf_actual_discounted_1word(original, modified, w, alpha, rho))
         results.append({'label': f'w = {w}, bound', 'type': 'bound', 'data': bounds})
         results.append({'label': f'w = {w}, actual', 'type': 'actual', 'data': actual_vals})
     gname = f'Graph of discrepancy between the outputs of {original.informal_name} and its modified versions as we read different input words. Each incremental modification of M reduces the {change_types[changetype]}'
@@ -212,15 +268,15 @@ def remove_one_state(transitions, nstates, alphabet):
 
 # discounted: means we're bounding a discounted sum of discrepancies (rhos) as we read the words
 # not discounted: means we're bounding the discrepancy (rho) at the end of reading a word
-def get_performance_bound(upper_bound, alpha, discounted=True, maxlen=-1):
+def get_performance_bound(dist, alpha, discounted=True, maxlen=-1):
     if discounted:
-        return upper_bound/alpha
+        return dist/alpha
     else:
-        return upper_bound / (alpha*(1-alpha)**maxlen)
+        return dist / (alpha*(1-alpha)**maxlen)
 
 
 # discounted sum of discrepancies between M and N as we read w
-def get_performance_actual(M, N, w, alpha, rho):
+def get_perf_actual_discounted_1word(M, N, w, alpha, rho):
     sum = 0
     w = str_to_ints(w)
     for i in range(len(w) + 1):
@@ -230,6 +286,22 @@ def get_performance_actual(M, N, w, alpha, rho):
         qN = N.state_after_word(w_subs)
         sum += rho(M, N, qM=qM, qN=qN) * (1 - alpha)**i
     return sum
+
+# average across test set
+def get_perf_actual_discounted(M, N, alpha, rho, size):
+    test_set = get_test_set(N, size)
+    score = 0
+    for w in test_set:
+        score += get_perf_actual_discounted_1word(M, N, w, alpha, rho)
+    return score / len(test_set)
+
+
+def get_perf_actual_undiscounted(M, N, rho, size, maxlen):
+    test_set = get_test_set(N, size, maxlen=-1)
+    score = 0
+    for w in test_set:
+        score += rho(M, N, w=w)
+    return score / len(test_set)
 
 
 # N is the 'blackbox' or the 'bigger automaton' that M is supposed to be an approximation of

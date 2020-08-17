@@ -4,7 +4,7 @@
 import math
 from metrics.rhos import rho_infty_norm_pdfas, rho_infty_norm_states, rho_infty_norm, kendall_tau
 from metrics.metric import compute_d, compare_truedist_vs_bound, get_brute_force_d_bound
-from metrics.metric_on_known_pdfa import get_test_set, get_performance_bound, get_modified_aut, get_performance_actual
+from metrics.metric_on_known_pdfa import get_test_set, get_performance_bound, get_modified_aut, get_perf_actual_discounted_1word
 from metrics.toy_pdfa import M_for_bf_test, N_for_bf_test, N_for_bf_test2, toy_pdfa1, toy_pdfa2, toy_pdfa3, toy_pdfa4, toy_pdfa5, toy_pdfa6, toy_pdfa7, toy_pdfa8, toy_pdfa9, toy_pdfa10, toy_pdfa_10statesA, toy_pdfa11, toy_pdfa12, toy_pdfa13, toy_pdfa14
 from weighted_lstar.our_grammars import uhl1
 resultfolder = 'results/unit_tests/'
@@ -16,22 +16,22 @@ resultfolder = 'results/unit_tests/'
 
 # compute metric
 def main():
-    # test_rho_infty_norm_states()
-    # test_compute_d()
-    # test_bound_d()
-    # test_compare_truedist_vs_bound()
-    # test_chg_nstates()
-    # test_chg_dist_all()
-    # test_chg_dist_one()
-    # test_get_performance_actual()
+    test_rho_infty_norm_states()
+    test_compute_d()
+    test_bound_d()
+    test_compare_truedist_vs_bound()
+    test_chg_nstates()
+    test_chg_dist_all()
+    test_chg_dist_one()
+    test_get_perf_actual_discounted_1word()
 
-    # test_construct_test_words()
-    # test_get_all_words_of_len()
+    test_construct_test_words()
+    test_get_all_words_of_len()
 
-    # test_brute_force_bound_all_paths()
-    # test_brute_force_bound_bfs()
+    test_brute_force_bound_all_paths()
+    test_brute_force_bound_bfs()
 
-    # test_get_test_set()
+    test_get_test_set()
     test_kendall_tau()
     # TODO call the rest
 
@@ -51,12 +51,12 @@ def test_kendall_tau():
     assert res == 0.5
 
 
-def test_get_performance_actual():
+def test_get_perf_actual_discounted_1word():
     rho = rho_infty_norm
     ws = ['0', '00', '000', '0000']
     expected = [0.4, 0.72, 0.976, 1.1808]
     for i, w in enumerate(ws):
-        res = get_performance_actual(toy_pdfa3(), toy_pdfa5(), w, 0.2, rho)
+        res = get_perf_actual_discounted_1word(toy_pdfa3(), toy_pdfa5(), w, 0.2, rho)
         #print(f'res: {res}')
         assert expected[i] == round(res, 4)
 

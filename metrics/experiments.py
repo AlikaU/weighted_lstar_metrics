@@ -1,7 +1,7 @@
 import time
 from datetime import datetime
 
-from metrics.metric_on_known_pdfa import plot_6
+from metrics.metric_on_known_pdfa import plot_6, plot_using_test_set
 from metrics.rhos import rho_infty_norm, rho_kt
 from metrics.toy_pdfa import toy_pdfa_10statesA, toy_pdfa_10statesB
 from weighted_lstar.our_grammars import uhl1, uhl2, uhl3
@@ -21,8 +21,9 @@ def main():
     #rho = rho_infty_norm
     rho = rho_kt
     #plot_6(PDFAs, alpha, steps, resultpath, logger, test_depth=3, bound_type='all_path', max_depth_add=max_depth_addition, max_revisits=max_rev)
-    plot_6(PDFAs, alpha, rho, steps, resultpath, logger, test_depth=3, bound_type='bfs', max_depth_add=max_depth_addition, max_revisits=max_rev)
-    
+    #plot_6(PDFAs, alpha, rho, steps, resultpath, logger, test_depth=3, bound_type='bfs', max_depth_add=max_depth_addition, max_revisits=max_rev)
+    plot_using_test_set([uhl1(), uhl2(), uhl3()], alpha, rho, steps, resultpath, logger, test_depth=3, bound_type='bfs', max_depth_add=1)
+    plot_using_test_set([uhl1(), uhl2(), uhl3()], alpha, rho, steps, resultpath, logger, test_depth=3, bound_type='bfs', max_depth_add=1, disc=False, max_wordlen=10)
     # compute_d(uhl1(), toy_pdfa12(), 0.2, 'example10') # expected: ?
     # compute_d(uhl1(), uhl3(), 0.2, 'example11') # expected: ?
     # compute_d(toy_pdfa6(), uhl1(), 0.2, 'example12') # expected: ?
