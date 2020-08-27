@@ -2,6 +2,7 @@ import math, os, random, numpy as np, matplotlib.pyplot as plt, matplotlib as mp
 from metrics import toy_pdfa
 from metrics.metric import compare_truedist_vs_bound, str_to_ints, get_brute_force_d_bound
 from metrics.vasilevski_chow_test_set import construct_spanning_tree_words
+from metrics.rhos import rho_kt
 
 from weighted_lstar.our_grammars import assert_and_give_pdfa
 
@@ -12,53 +13,6 @@ change_types = {
 }
 
 
-# result is one chg_type with either d_as_difference_increases or delta_as_difference_increases
-# both objects are structured like so:
-# y axis: bounds, actual_vals
-# x axis: assumed to be i in range (steps)
-def plot_results(result, steps, resultpath):
-    colors = {'tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan'}
-    mpl.style.use('seaborn')
-    print(result)
-    #x = list(range(steps))
-    three_types_of_lines = False
-    for i, res in enumerate(result['results']):
-        y = res['data']
-        lbl = res['label']
-        if res['type'] == 'bound':
-            line_style = '--'
-        elif res['type'] == 'actual':
-            line_style = '-'
-        else:
-            line_style = ':'
-            three_types_of_lines = True
-        
-        if three_types_of_lines:
-            clr = f'C{math.floor(i/3.0)}'
-        else:
-            clr = f'C{math.floor(i/2.0)}'
-
-        #plt.plot(x, y, line_style, color=clr, label=lbl)
-        plt.plot(y, line_style, color=clr, label=lbl)
- 
-    
-    #plt.grid(b=True, which='major', color='#666666', linestyle='-', alpha=0.4)
-    plt.minorticks_on()
-    #plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
-    #     plt.ylim(0.5, 1)
-
-    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=3, fancybox=True, shadow=True)
-    plt.xlabel(result['xlabel'])
-    plt.ylabel(result['ylabel'])
-    plt.tight_layout()
-    #plt.suptitle(result['graph_name'])
-    #plt.text(5, 10, result['graph_name'], ha='center', va='bottom', wrap=True)
-    sn = result['short_name']
-    results_filename = f'{resultpath}/{sn}.png'
-    plt.savefig(results_filename)
-    plt.close()
-
-
 def plot_using_test_set(PDFAs, alpha, rho, steps, resultpath, logger, test_depth=3, bound_type='bfs', max_depth_add=0, disc=True, max_wordlen=10):
     to_plot = []
     for change_type in change_types:
@@ -66,6 +20,7 @@ def plot_using_test_set(PDFAs, alpha, rho, steps, resultpath, logger, test_depth
         results = []
 
         for original in PDFAs:
+            result_for_pdfa = []
             if resultpath:
                 original.draw_nicely(keep=True,filename=f'{resultpath}/{original.informal_name}/original_pdfa')
 
@@ -91,16 +46,19 @@ def plot_using_test_set(PDFAs, alpha, rho, steps, resultpath, logger, test_depth
                 else:
                     perf_actuals.append(get_perf_actual_undiscounted(modified, original, rho, 2000, max_wordlen))
                 
-            results.append({'label': f'bound (true d), {original.informal_name}', 'type': 'bound_true_d', 'data': perf_bounds_d_true})
-            results.append({'label': f'bound (estimate of d), {original.informal_name}', 'type': 'bound', 'data': perf_bounds_d_bound})
-            results.append({'label': f'actual, {original.informal_name}', 'type': 'actual', 'data': perf_actuals})
+            result_for_pdfa.append({'label': f'bound (true d), {original.informal_name}', 'type': 'bound_true_d', 'data': perf_bounds_d_true, 'xlabel': original.informal_name, })
+            result_for_pdfa.append({'label': f'bound (estimate of d), {original.informal_name}', 'type': 'bound', 'data': perf_bounds_d_bound, 'xlabel': original.informal_name, })
+            result_for_pdfa.append({'label': f'actual, {original.informal_name}', 'type': 'actual', 'data': perf_actuals, 'xlabel': original.informal_name, })
+            results.append(result_for_pdfa)
+
         gname = f'Graph of performande of modified versions of {original.informal_name} wrt. the original. Performance is measured using the cumulative discounted discrepancy, averaged across the dataset. Each incremental modification of M reduces the {change_types[change_type]}'
         disc_str = 'discounted' if disc else 'undiscounted'
+        rho_name = 'Kendall Tau' if rho == rho_kt else 'infinity norm between distributions'
         sname = f'performance_{change_type}_{disc_str}'
-        to_plot.append({'results': results, 'graph_name': gname, 'short_name': sname, 'xlabel': 'change_amount', 'ylabel': 'performance'})
+        to_plot.append({'results': results, 'graph_name': gname, 'short_name': sname, 'ylabel': rho_name})
     
     for result in to_plot:
-        plot_results(result, steps, resultpath)
+        plot_results_subplts(result, steps, resultpath)
 
 
 # TODO maybe play with test_depth
@@ -121,7 +79,6 @@ def plot_6(PDFAs, alpha, rho, steps, resultpath, logger, test_depth=3, bound_typ
 
 
 # d between original PDFAs and different variations of them
-
 def d_as_difference_increases(PDFAs, changetype, steps, alpha, rho, resultpath, logger, test_depth, bound_type, max_depth_add, max_revisits):
     results = []
     for original in PDFAs:
@@ -326,4 +283,115 @@ def get_test_set(N, size, maxlen=-1):
         samples.append(word)
     #print(f'samples:{samples}')
     return samples
+
+
+# result is one chg_type with either d_as_difference_increases or delta_as_difference_increases
+# both objects are structured like so:
+# y axis: bounds, actual_vals
+# x axis: assumed to be i in range (steps)
+def plot_results(result, steps, resultpath):
+    colors = {'tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan'}
+    mpl.style.use('seaborn')
+    print(result)
+    #x = list(range(steps))
+    three_types_of_lines = False
+    for i, res in enumerate(result['results']):
+        y = res['data']
+        lbl = res['label']
+        if res['type'] == 'bound':
+            line_style = '--'
+        elif res['type'] == 'actual':
+            line_style = '-'
+        else:
+            line_style = ':'
+            three_types_of_lines = True
+        
+        if three_types_of_lines:
+            clr = f'C{math.floor(i/3.0)}'
+        else:
+            clr = f'C{math.floor(i/2.0)}'
+
+        #plt.plot(x, y, line_style, color=clr, label=lbl)
+        plt.plot(y, line_style, color=clr, label=lbl, marker='.')
+ 
+    
+    #plt.grid(b=True, which='major', color='#666666', linestyle='-', alpha=0.4)
+    plt.minorticks_on()
+    #plt.grid(b=True, which='minor', color='#999999', linestyle='-', alpha=0.2)
+    #     plt.ylim(0.5, 1)
+
+    plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=3, fancybox=True, shadow=True)
+    plt.xlabel(result['xlabel'])
+    plt.ylabel(result['ylabel'])
+    plt.tight_layout()
+    #plt.suptitle(result['graph_name'])
+    #plt.text(5, 10, result['graph_name'], ha='center', va='bottom', wrap=True)
+    sn = result['short_name']
+    results_filename = f'{resultpath}/{sn}.png'
+    plt.savefig(results_filename)
+    plt.close()
+
+
+# quick hack copypaste of the other plot method, with some tweaks
+def plot_results_subplts(pdfa_results, steps, resultpath):
+    colors = {'tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan'}
+    mpl.style.use('seaborn')
+    print(pdfa_results)
+    
+    ylimit = getmax(pdfa_results) + 1
+    xlimit = get_xlim(pdfa_results)
+    
+    print(f'ylim: {ylimit}')
+    #plt.figure(figsize=(14,7))
+    plt.ylabel(pdfa_results['ylabel'])
+
+    for j, pdfa in enumerate(pdfa_results['results']):
+        for i, res in enumerate(pdfa):
+            y = res['data']
+            lbl = res['label']
+            if res['type'] == 'bound':
+                line_style = '--'
+            elif res['type'] == 'actual':
+                line_style = '-'
+            else:
+                line_style = ':'
+            
+            clr = f'C{j}'
+            plt.subplot(1, len(pdfa_results['results']), j+1)
+            plt.ylim(-0.2, ylimit)
+            plt.xlim(0, xlimit)
+            plt.plot(y, line_style, color=clr, label=lbl, marker='|')
+            plt.xlabel(res['xlabel'])
+        
+        plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=3, fancybox=True, shadow=True)
+    
+    plt.minorticks_on()
+
+   
+    # plt.xlabel(pdfa_results['xlabel'])
+    
+    plt.tight_layout()
+    #plt.subplots_adjust(hspace=1.0, wspace=1.0)
+    sn = pdfa_results['short_name']
+    results_filename = f'{resultpath}/{sn}.png'
+    plt.savefig(results_filename)
+    plt.close()
+
+
+def getmax(pdfa_results):
+    curr_max = 0
+    for j, pdfa in enumerate(pdfa_results['results']):
+        for i, res in enumerate(pdfa):
+            temp = max(res['data'])
+            curr_max = max(temp, curr_max)
+    return curr_max
+
+def get_xlim(pdfa_results):
+    curr_max = 0
+    for j, pdfa in enumerate(pdfa_results['results']):
+        for i, res in enumerate(pdfa):
+            temp = len(res['data'])
+            curr_max = max(temp, curr_max)
+    return curr_max
+
 

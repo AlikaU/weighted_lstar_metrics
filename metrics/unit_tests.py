@@ -33,7 +33,6 @@ def main():
 
     test_get_test_set()
     test_kendall_tau()
-    # TODO call the rest
 
 
 def test_kendall_tau():
